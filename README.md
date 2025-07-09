@@ -65,6 +65,7 @@ source venv/bin/activate  # Windows: venv\Scripts\activate
 
 3. **Install dependencies**
 ```bash
+# pip install pydantic-ai pydantic openai rich click prompt-toolkit textual aiofiles python-dotenv orjson pytest pytest-asyncio pytest-cov black isort flake8 mypy
 pip install -r requirements.txt
 ```
 
