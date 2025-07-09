@@ -45,7 +45,7 @@
 ## 🚀 Installation
 
 ### Prerequisites
-- Python 3.8 or higher
+- Python 3.11 or higher
 - Node.js and npm (for Context7 MCP server)
 - OpenAI API key or compatible endpoint
 
@@ -53,8 +53,8 @@
 
 1. **Clone the repository**
 ```bash
-git clone https://github.com/yourusername/context7-explorer.git
-cd context7-explorer
+git clone https://github.com/nordeim/Context7-Explorer
+cd Context7-Explorer
 ```
 
 2. **Create virtual environment**
