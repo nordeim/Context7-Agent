@@ -1,5 +1,11 @@
 # 🚀 Context7 Document Explorer
 
+<p align="center">
+  <a href="#">
+    <img src="https://raw.githubusercontent.com/nordeim/Context7-Explorer/refs/heads/main/main_screen.png" alt="The Scent - Homepage" width="800"/>
+  </a>
+</p>
+
 <div align="center">
 
 ![Context7 Explorer](https://img.shields.io/badge/Context7-Explorer-ff006e?style=for-the-badge)
