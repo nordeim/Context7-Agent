@@ -1,4 +1,3 @@
-# File: main.py
 #!/usr/bin/env python3
 """
 Context7 Document Explorer - AI-Powered Document Search

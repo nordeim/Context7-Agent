@@ -1,0 +1,17 @@
+# find .env.example .gitignore main.py src README.md -type f
+.env.example
+.gitignore
+main.py
+src/__init__.py
+src/config.py
+src/ui/__init__.py
+src/ui/components.py
+src/ui/dashboard.py
+src/ui/themes.py
+src/explorer_cli.py
+src/context7_integration.py
+src/data/__init__.py
+src/data/bookmarks.py
+src/data/history_manager.py
+src/data/session_manager.py
+README.md
