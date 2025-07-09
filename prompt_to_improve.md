@@ -1,0 +1,2 @@
+awesome job! but I believe you can create an even more awesomely cool looking and user-friendly interactive CLI agent that interacts with the Context7 MCP server to search for relevant document for a given subject. please put on your deep-thinking hat to deeply and systematically explore carefully and thoroughly to re-image a re-imagined app. Please try your very best! I have tremendous faith in your super app coding ability. thank you and good luck!
+
