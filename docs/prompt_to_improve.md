@@ -12,3 +12,7 @@ Please carefully validate any logic and coding errors that you may suspect, then
 
 ---
 awesome design! please regenerate for me all the project files again in case I miss some. put on your deep-thinking hat to carefully and systematically come up with an execution plan, then proceed with the plan to create all the project code files that are complete and drop-in replacement version. please double-check and validate each file as you generate to make sure all the files are correct and fully working. I trust your due diligence as an elite AI coding assistant. thank you and good luck! 
+
+---
+awesome job! create a very detailed step-by-step deployment guide in markdown format for your improved design, use at least 4000 words for the deployment guide and make it very clear, logical and easy to follow by non-IT savvy person . please put on your deep-thinking hat to deeply and meticulously re-imagine an awesome and highly useful guide for novice, include all the necessary commands (bash scripts, for create the project file hierarchy, Dockerfile and docker compose file, etc). I trust that you will do a great due diligence as my absolutely trusted AI coding assistant. thank you and good luck!
+
