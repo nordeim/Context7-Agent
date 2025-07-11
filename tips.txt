@@ -14,8 +14,6 @@ cd .. ; pwd ; rm -rf ttt4
 
 $ :%s/^# app\//# File: app\//  
 
-git commit -m "update bank recon"
-
 git commit -m "update docs"
 
 git status

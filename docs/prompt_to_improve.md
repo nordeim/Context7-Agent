@@ -10,3 +10,5 @@ Then help me to carefully review and validate the application codebase shared in
 
 Please carefully validate any logic and coding errors that you may suspect, then use extensive web searches to validate your findings and assumptions.
 
+---
+awesome design! please regenerate for me all the project files again in case I miss some. put on your deep-thinking hat to carefully and systematically come up with an execution plan, then proceed with the plan to create all the project code files that are complete and drop-in replacement version. please double-check and validate each file as you generate to make sure all the files are correct and fully working. I trust your due diligence as an elite AI coding assistant. thank you and good luck! 
