@@ -1,4 +1,7 @@
-awesome job! but I believe you can create an even more awesomely cool looking and user-friendly interactive CLI agent that interacts with the Context7 MCP server to search for relevant document for a given subject. please put on your deep-thinking hat to deeply and systematically explore carefully and thoroughly to re-image a re-imagined app. Please try your very best! I have tremendous faith in your super app coding ability. thank you and good luck!
+awesome job! But I believe you can create an even more awesomely cool-looking and user-friendly interactive CLI agent that interacts with the Context7 MCP server to search for relevant documents for a given subject. Please put on your deep-thinking hat to deeply and systematically explore carefully and thoroughly to re-image a re-imagined app. Please try your very best! I have tremendous faith in your super app coding ability. Thank you and good luck!
+
+---
+awesome job! Please create a detailed and comprehensive `Project Architecture Document` in markdown format. Use at least 6000 words to clearly and logically describe your improved design with code snippets as examples wirh explanations. Use diagrams to show the file hierarchy with key files and their explanation. Use a mermaid diagram to show/describe the modules' interaction with each other and with the user. This document should be clear and logical, and comprehensive to serve as a source of truth to help new project members understand the codebase of the improved design quickly. Make it an awesome PAD that matches the awesomeness of your improved design. Be sure to put on your deep-thinking hat to reimagine the PAD. Thank you and good luck!
 
 ---
 Deeply understand your role and responsibilities and share with me your understanding.
