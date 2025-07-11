@@ -59,13 +59,8 @@ class Context7Manager:
         self._document_cache: Dict[str, Document] = {}
         self._index_metadata: Dict[str, Any] = {}
         
-        # --- BEGIN MODIFICATION 1 ---
         # Initialize OpenAI model
-        # Corrected constructor for pydantic-ai v0.4.0:
-        # Removed 'api_key' and 'base_url' as they are handled by the
-        # underlying client via environment variables.
         self.model = OpenAIModel(model_name=config.openai_model)
-        # --- END MODIFICATION 1 ---
     
     def _ensure_directories(self):
         """Ensure required directories exist."""
@@ -92,9 +87,7 @@ class Context7Manager:
             # Connect to the MCP server
             await self.mcp_client.connect()
             
-            # --- BEGIN MODIFICATION 2 ---
             # Initialize the agent with Context7 tools
-            # Corrected keyword from 'model' to 'llm' for pydantic-ai v0.4.0
             self.agent = Agent(
                 llm=self.model,
                 system_prompt="""You are a document search and analysis expert with access to 
@@ -102,7 +95,6 @@ class Context7Manager:
                 and provide intelligent summaries. You can search through documents, analyze 
                 their content, and identify relationships between different documents."""
             )
-            # --- END MODIFICATION 2 ---
             
             # Register Context7 tools
             tools = await self.mcp_client.list_tools()
@@ -131,6 +123,12 @@ class Context7Manager:
         progress_callback: Optional[Callable] = None
     ) -> List[Document]:
         """Search documents using Context7."""
+        # --- BEGIN MODIFICATION ---
+        # Add guard clause to prevent crash in offline mode.
+        if not self.agent:
+            print("Search error: Context7 agent not initialized (offline mode).")
+            return []
+        # --- END MODIFICATION ---
         try:
             # Use the agent to search with Context7 tools
             search_prompt = f"""
@@ -145,12 +143,8 @@ class Context7Manager:
             
             result = await self.agent.run(search_prompt)
             
-            # --- BEGIN MODIFICATION 3 ---
             # Parse the results
-            # Corrected to use the result string directly, as agent.run in v0.4.0
-            # does not return an object with a .data attribute.
             documents = self._parse_search_results(result)
-            # --- END MODIFICATION 3 ---
             
             # Apply client-side filtering and scoring
             documents = self._apply_filters(documents, query.filters)
@@ -312,6 +306,11 @@ class Context7Manager:
     
     async def analyze_document(self, doc_id: str) -> Dict[str, Any]:
         """Analyze document using AI."""
+        # --- BEGIN MODIFICATION ---
+        # Add guard clause to prevent crash in offline mode.
+        if not self.agent:
+            return {"error": "Context7 agent not initialized (offline mode)."}
+        # --- END MODIFICATION ---
         content = await self.get_document_content(doc_id)
         if not content:
             return {}
@@ -330,11 +329,8 @@ class Context7Manager:
         
         result = await self.agent.run(analysis_prompt)
         
-        # --- BEGIN MODIFICATION 4 ---
         # Parse and return analysis
-        # Corrected to use the result string directly.
         return self._parse_analysis(result)
-        # --- END MODIFICATION 4 ---
     
     def _parse_analysis(self, raw_analysis: str) -> Dict[str, Any]:
         """Parse document analysis results."""
@@ -346,6 +342,11 @@ class Context7Manager:
     
     async def find_similar_documents(self, doc_id: str, limit: int = 5) -> List[Document]:
         """Find documents similar to the given document."""
+        # --- BEGIN MODIFICATION ---
+        # Add guard clause to prevent crash in offline mode.
+        if not self.agent:
+            return []
+        # --- END MODIFICATION ---
         if doc_id not in self._document_cache:
             return []
         
@@ -362,11 +363,8 @@ class Context7Manager:
         
         result = await self.agent.run(similarity_prompt)
         
-        # --- BEGIN MODIFICATION 5 ---
         # Parse and return similar documents
-        # Corrected to use the result string directly.
         return self._parse_search_results(result)
-        # --- END MODIFICATION 5 ---
     
     async def cleanup(self):
         """Clean up resources."""
