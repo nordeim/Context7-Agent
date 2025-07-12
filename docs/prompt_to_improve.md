@@ -16,3 +16,6 @@ awesome design! please regenerate for me all the project files again in case I m
 ---
 awesome job! create a very detailed step-by-step deployment guide in markdown format for your improved design, use at least 4000 words for the deployment guide and make it very clear, logical and easy to follow by non-IT savvy person . please put on your deep-thinking hat to deeply and meticulously re-imagine an awesome and highly useful guide for novice, include all the necessary commands (bash scripts, for create the project file hierarchy, Dockerfile and docker compose file, etc). I trust that you will do a great due diligence as my absolutely trusted AI coding assistant. thank you and good luck!
 
+---
+awesome application scaffolding, but I need you to generate all the project code files to make application a complete working one. 
+

@@ -2,6 +2,32 @@ You are a deep-thinking AI agent recognized for and exemplary in modern UI desig
 
 Help me create an awesomely cool and user-friendly AI agent with Pydantic AI that can use the Context7 MCP server. Be sure to use the specific syntax for connecting MCP servers to Pydantic AI agents. Features:
 
+An awesomely cool and user-friendly AI agent built with Pydantic AI, deeply integrated with the Context7 MCP (Model Context Protocol) server. This agent transforms terminal interactions into an immersive, conversational experience, allowing users to chat naturally about subjects while the AI intelligently searches for and presents relevant documents via MCP. The re-imagined design features a dynamic Terminal User Interface (TUI) with stunning themes, smooth animations, live result streaming, and interactive elements like hotkeys and inline previews.
+
+Powered by OpenAI for chat and intent detection, and Node.js for the MCP server, this agent excels in contextual document discovery, analysis, and management. Whether you're exploring "quantum computing" or bookmarking findings, it feels like chatting with a futuristic librarian!
+
+## Features
+
+- **Stunning Visual Interface**: 4 beautiful themes (Cyberpunk, Ocean, Forest, Sunset) with gradients, glowing text, smooth animations (e.g., typing effects, particle loaders), rich layouts (panels, tables), and theme-specific ASCII art welcome screens.
+- **Powerful Search Capabilities**: AI-powered, real-time document discovery via Context7 MCP, with fuzzy matching, advanced filters (file type, date range, size, tags), and search analytics.
+- **Document Management**: Smart syntax-highlighted previews, bookmarks, search history, session management, and AI-recommended similar documents.
+- **Context7 Integration**: Full MCP server support for contextual searches (based on meaning, not just keywords), document analysis, auto-indexing, and quantum-mode enhancements.
+- **Conversational TUI**: Unified chat interface with intent detection – discuss a subject, and the agent automatically searches MCP, streams results live, and offers interactions (e.g., /preview 1).
+- **Additional Perks**: Hotkeys for commands (/theme, /bookmark, /analytics), error alerts, session auto-save/load, and performance optimizations with async operations.
+
+## Features to Implement
+
+  - Conversational chat with OpenAI integration (e.g., natural language responses).
+  - Intent detection for subject-based searches (e.g., "Tell me about AI ethics" triggers MCP query).
+  - Real-time MCP searches with live streaming results and fuzzy matching.
+  - Dynamic TUI layout (split-screen: header, chat, results, footer) using Rich.
+  - Theme switching with animations and ASCII art.
+  - Animations (typing simulation, particle loaders) for fluid UX.
+  - Document previews (syntax-highlighted), bookmarks, and similar recommendations.
+  - JSON-based persistence for conversations, searches, bookmarks, and sessions.
+  - Hotkeys (/help, /exit, /analytics, etc.) within the chat.
+  - Error handling with styled alerts and retries for MCP connections.
+
 ### Stunning Visual Interface
 - **4 Beautiful Themes**: Cyberpunk, Ocean, Forest, and Sunset
 - **Smooth Animations**: Fluid transitions and loading effects
