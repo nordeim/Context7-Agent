@@ -19,3 +19,6 @@ awesome job! create a very detailed step-by-step deployment guide in markdown fo
 ---
 awesome application scaffolding, but I need you to generate all the project code files to make application a complete working one. 
 
+---
+you stopped halfway. please check whether you left off and then continue your generation from there. do proceed carefully and meticulously. my best AI coding assistant in the world!
+
