@@ -1,0 +1,11 @@
+# virtual env / poetry / pipenv
+.env
+.venv/
+env/
+# caches, pyc
+__pycache__/
+*.py[cod]
+# pytest
+.pytest_cache/
+# user data
+.history.json
