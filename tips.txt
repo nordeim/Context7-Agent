@@ -31,6 +31,8 @@ The important point is to proceed very carefully so as not to introduce any regr
 Below is "diff" command output comparing the previous version with your latest generated version. Please double-check and validate that the changes are valid and that no other original features or functions are lost (omitted). use the same rigorous and meticulous approach to review the diff output below.
 
 ---
+You really need to put in more effort to use extensive web searches to dig deeper to validate your assumptions. You can review the attached suggested fix, use extensive web searches to validate the fix very deeply, systematically and carefully!
+
 please carefully review the errors and then plan to fix them. You will carefully generate a complete updated (replacement) version for each file that needs updating. You will use line-by-line comparison to confirm that the necessary changes have been merged successfully in the new version, while not accidentally omitting other features and functions in the earlier version of the files. Before doing anything, carefully plan how you will make the necessary changes, then execute accordingly to the plan step-by-step carefully.
 
 Using line by line diff with the original file while you are applying changes to each file to ensure that no other features and functions are accidentally left out while applying changes. we don't want to introduce regression failure while updating the code. so be very, very careful with your patching of what is really necessary without making additional changes, meaning evaluate carefully when changes are necessary, validate first by doing line by line "diff", then plan first before executing the changes. Do testing and simulation if possible. enclose your complete and updated version of the updated files within the ```python (or ```js or ```sql or ```json) opening and ``` closing tags. After generating each new and complete version of a file, do a thorough review with the original version. Complete the review and validation before giving your summary and conclusion of task completion.
@@ -42,3 +44,10 @@ You really need to be thorough in your analysis to avoid going into endless loop
 ---
 please use the same rigor and meticulous approach to systematically fix each file affected. 
 excellent result so far! please proceed with the next step/Phase in your "enhancement" execution plan.
+
+---
+you are not putting on your deep-thinking hat to deeply explore, search the web for documentation and examples to validate your assumptions!
+
+---
+You really need to put in more effort to use extensive web searches to dig deeper to validate your assumptions. You can review the attached suggested fix, use extensive web searches to validate the fix very deeply, systematically and carefully!
+

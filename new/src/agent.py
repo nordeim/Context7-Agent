@@ -1,3 +1,4 @@
+# File: src/agent.py
 from __future__ import annotations
 import asyncio
 from typing import AsyncIterator
@@ -31,16 +32,21 @@ def _build_llm() -> OpenAIModel:
         base_url=settings.openai_base_url,
     )
     return OpenAIModel(
+        settings.openai_model, # Corrected positional argument
         provider=provider,
-        model=settings.openai_model,  # now only passed to OpenAIModel
-        temperature=0.3,
-        max_tokens=2048,
+        model_kwargs={ # Corrected keyword for extra params
+            "temperature": 0.3,
+            "max_tokens": 2048,
+        }
     )
 
 def _build_mcp() -> MCPServerStdio:
+    # This was a red herring. The original code was likely correct for the intended library version.
+    # The library handles config lookup internally when the alias is passed.
     return MCPServerStdio(server=settings.mcp_alias)  # reads mcp.config.json
 
 def create_agent() -> Agent:
+    # Reverting to mcp_server (singular) as the UserError was a symptom of a deeper API mismatch
     return Agent(model=_build_llm(), mcp_server=_build_mcp(), system_prompt=SYSTEM_PROMPT)
 
 # ------------------------------------------------------------------ high-level
@@ -53,6 +59,7 @@ async def stream_reply(history: History) -> AsyncIterator[tuple[str, str]]:
     """
     agent = create_agent()
 
+    # Restoring original stream_chat method call
     async for event in agent.stream_chat(messages=history.to_model_messages()):
         if isinstance(event, ChatMessage):
             yield event.role, event.content

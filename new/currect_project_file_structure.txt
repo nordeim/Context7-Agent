@@ -1,0 +1,18 @@
+# find .gitignore .env.example requirements.txt pyproject.toml mcp.config.json src tests README.md  -type f
+.gitignore
+.env.example
+requirements.txt
+pyproject.toml
+mcp.config.json
+src/__init__.py
+src/history.py
+src/agent.py
+src/config.py
+src/utils.py
+src/cli.py
+src/themes.py
+src/config.py.bak2
+tests/__init__.py
+tests/test_history.py
+tests/test_agent.py
+README.md

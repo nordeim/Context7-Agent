@@ -13,7 +13,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
-from .agent import stream_reply
+from .agent import stream_reply, cleanup
 from .config import settings
 from .history import History
 from .utils import banner, get_console, switch_theme
@@ -112,25 +112,30 @@ def chat():
     c = get_console()
     layout = ChatLayout()
 
-    with Live(layout, console=c, auto_refresh=False, screen=False) as live:
-        while True:
-            live.refresh()
-            try:
-                user_input = Prompt.ask("[user]❯")
-            except (EOFError, KeyboardInterrupt):
-                c.print("\n[sys]Bye![/sys]")
-                raise typer.Exit()
+    try:
+        with Live(layout, console=c, auto_refresh=False, screen=False) as live:
+            while True:
+                live.refresh()
+                try:
+                    user_input = Prompt.ask("[user]❯")
+                except (EOFError, KeyboardInterrupt):
+                    c.print("\n[sys]Bye![/sys]")
+                    raise typer.Exit()
 
-            if user_input.strip().lower() == "/exit":
-                c.print("[sys]Session saved. Goodbye.[/sys]")
-                break
+                if user_input.strip().lower() == "/exit":
+                    c.print("[sys]Session saved. Goodbye.[/sys]")
+                    break
 
-            async def _consume():
-                async for _ in handle_user_input(user_input, layout):
-                    live.refresh()
+                async def _consume():
+                    async for _ in handle_user_input(user_input, layout):
+                        live.refresh()
 
-            asyncio.run(_consume())
-            live.refresh()
+                asyncio.run(_consume())
+                live.refresh()
+    finally:
+        c.print("\n[sys]Shutting down MCP server...[/sys]")
+        asyncio.run(cleanup())
+        c.print("[sys]Shutdown complete.[/sys]")
 
 
 if __name__ == "__main__":

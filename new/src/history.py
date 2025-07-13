@@ -6,9 +6,11 @@ from typing import List
 
 from pydantic import BaseModel
 
+
 class ChatMessage(BaseModel):
     role: str
     content: str
+
 
 class History:
     """
@@ -30,8 +32,10 @@ class History:
                 self.messages = []
 
     def save(self):
+        # Use model_dump for Pydantic v2+ compatibility
         self.file.write_text(
-            json.dumps([m.dict() for m in self.messages], indent=2), encoding="utf-8"
+            json.dumps([m.model_dump() for m in self.messages], indent=2),
+            encoding="utf-8",
         )
 
     # ------------------------------------------------------------------ helpers
@@ -41,4 +45,3 @@ class History:
 
     def to_model_messages(self) -> List[ChatMessage]:
         return self.messages
-
