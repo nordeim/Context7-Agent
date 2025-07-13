@@ -4,8 +4,11 @@ import json
 from pathlib import Path
 from typing import List
 
-from pydantic_ai import ChatMessage
+from pydantic import BaseModel
 
+class ChatMessage(BaseModel):
+    role: str
+    content: str
 
 class History:
     """
@@ -38,3 +41,4 @@ class History:
 
     def to_model_messages(self) -> List[ChatMessage]:
         return self.messages
+

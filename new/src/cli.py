@@ -19,7 +19,7 @@ from .history import History
 from .utils import banner, get_console, switch_theme
 
 app = typer.Typer()
-history = History(settings.history_path)
+history = History(settings.history_path)  # <-- changed from history_file to history_path
 
 
 # --------------------------------------------------------------------------- UI

@@ -32,7 +32,7 @@ def _build_llm() -> OpenAIModel:
     )
     return OpenAIModel(
         provider=provider,
-        model=settings.openai_model,
+        model=settings.openai_model,  # now only passed to OpenAIModel
         temperature=0.3,
         max_tokens=2048,
     )
@@ -58,4 +58,3 @@ async def stream_reply(history: History) -> AsyncIterator[tuple[str, str]]:
             yield event.role, event.content
         else:
             yield "mcp", str(event)
-
