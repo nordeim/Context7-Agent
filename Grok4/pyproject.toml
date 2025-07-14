@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "context7-agent"
+version = "0.1.0"
+description = "AI agent with Pydantic AI and Context7 MCP"
+authors = ["Your Name"]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pydantic-ai = "*"
+rich = "*"
+openai = "*"
+python-dotenv = "*"
+pytest = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

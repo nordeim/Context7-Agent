@@ -1,0 +1,101 @@
+$ diff -u src/agent.py-previous src/agent.py
+```diff
+--- src/agent.py-previous     2025-07-14 10:17:20.113750071 +0800
++++ src/agent.py        2025-07-14 10:29:39.452050040 +0800
+@@ -53,11 +53,8 @@
+ class Context7Agent:
+     """
+     Context7 Agent implementation using Pydantic AI.
+-
+-    This agent integrates with the Context7 MCP server for enhanced context management
+-    and uses an OpenAI model with OpenAIProvider as the underlying LLM provider.
+-    Supports intent detection, MCP searches, and conversational responses.
+     """
++
+     def __init__(self):
+         """
+         Initialize the Context7 Agent with configuration from environment variables.
+@@ -82,7 +79,8 @@
+     def detect_intent(self, message: str) -> str:
+         """Detect if the message intends a search or command."""
+         if "/search" in message or any(
+-            keyword in message.lower() for keyword in ["tell me about", "find docs on", "search for"]
++            keyword in message.lower()
++            for keyword in ["tell me about", "find docs on", "search for"]
+         ):
+             return "search"
+         elif message.startswith("/"):
+@@ -98,7 +96,7 @@
+         self.history.add_search(query, mock_results)
+         return mock_results
+ 
+-    def generate_response(self, message: str, conversation: List[Dict]) -> str:
++    async def generate_response(self, message: str, conversation: List[Dict]) -> str:
+         """Generate response using OpenAI via Pydantic AI."""
+         intent = self.detect_intent(message)
+         if intent == "search":
+@@ -117,7 +115,7 @@
+             raw_msgs = conversation + [{"role": "user", "content": message}]
+             model_msgs = _to_model_message_dict(raw_msgs)
+             messages = ModelMessagesTypeAdapter.validate_python(model_msgs)
+-            ai_response = self.agent.run(messages)
++            ai_response = await self.agent.run(messages)
+             return ai_response
+ 
+     def handle_command(self, command: str) -> str:
+```
+
+$ diff -u src/cli.py-previous src/cli.py
+```diff
+--- src/cli.py-previous       2025-07-14 09:05:27.782367216 +0800
++++ src/cli.py  2025-07-14 10:29:39.452050040 +0800
+@@ -53,11 +53,11 @@
+         rprint(Panel(art, title="Welcome to Context7 Agent", style=self.styles["panel"]))
+         self.typing_animation("Hello! Chat naturally or use /commands. Try 'Tell me about AI ethics'.")
+ 
+-    def handle_input(self):
++    async def handle_input(self):
+         while True:
+-            user_input = Prompt.ask("[bold]You[/bold]", console=console)
++            user_input = await asyncio.to_thread(Prompt.ask, "[bold]You[/bold]", console)
+             if user_input == "/exit":
+-                self.agent.history.save()
++                await asyncio.to_thread(self.agent.history.save)
+                 break
+             if user_input.startswith("/theme"):
+                 theme = user_input.split()[-1]
+@@ -68,20 +68,20 @@
+                 continue
+             if user_input.startswith("/preview"):
+                 doc_id = int(user_input.split()[-1])
+-                preview = self.agent.preview_document(doc_id)
++                preview = await asyncio.to_thread(self.agent.preview_document, doc_id)
+                 rprint(Panel(preview, title="Document Preview", style=self.styles["preview"]))
+                 continue
+             # Add more hotkeys...
+ 
+             self.agent.history.add_message("user", user_input)
+-            self.particle_loader()
++            await asyncio.to_thread(self.particle_loader)
+ 
+-            response = self.agent.generate_response(user_input, self.conversation)
++            response = await self.agent.generate_response(user_input, self.conversation)
+             self.agent.history.add_message("assistant", response)
+             self.conversation = self.agent.history.get_conversation()
+ 
+             rprint(Panel(response, title="Agent", style=self.styles["response"]))
+-            self.typing_animation("")
++            await asyncio.to_thread(self.typing_animation, "")
+ 
+     async def run(self):
+         layout = Layout()
+@@ -97,7 +97,7 @@
+             self.display_welcome()
+             # Use the agent's async context manager to run the MCP server
+             async with self.agent.agent.run_mcp_servers():
+-                self.handle_input()
++                await self.handle_input()
+ 
+ if __name__ == "__main__":
+     asyncio.run(CLI().run())
+```

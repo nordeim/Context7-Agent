@@ -1,0 +1,32 @@
+# File: src/config.py
+"""
+Configuration module for the Context7 Agent.
+
+Handles environment variables and validation.
+"""
+
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+class Config:
+    def __init__(self):
+        self.openai_api_key = os.getenv("OPENAI_API_KEY")
+        self.openai_base_url = os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1")
+        self.openai_model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+        self.mcp_config = {
+            "mcpServers": {
+                "context7": {
+                    "command": "npx",
+                    "args": ["-y", "@upstash/context7-mcp@latest"]
+                }
+            }
+        }
+
+    def validate(self) -> str:
+        if not self.openai_api_key:
+            return "OPENAI_API_KEY is required."
+        return None
+
+config = Config()

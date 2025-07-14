@@ -51,3 +51,6 @@ you are not putting on your deep-thinking hat to deeply explore, search the web 
 ---
 You really need to put in more effort to use extensive web searches to dig deeper to validate your assumptions. You can review the attached suggested fix, use extensive web searches to validate the fix very deeply, systematically and carefully!
 
+---
+please do a deep dive research on the `Pydantic AI` and MCP documentations, particularly related to `Context 7` MCP server. with a deep understanding of the current python library module for `Pydantic AI`, help me carefully review the following error and think deeply to explore the best possible option or solution to fix the runtime error.
+
