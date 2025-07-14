@@ -1,5 +1,6 @@
-pydantic_ai
+pydantic_ai 
 rich
-openai
+openai      
 python-dotenv
 pytest
+anyio
