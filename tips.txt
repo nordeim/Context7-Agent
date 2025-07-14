@@ -1,16 +1,12 @@
 egrep -n '^```|^# File:|^# app\/|^\/\/ ' oo1
-egrep -n '^```|^# File:|^# app\/|^\/\/ ' ttt4/oo1
 
 python3 ../extract_code_files.py oo1
-
 python3 extract_code_files.py  oo1
 
 find app -type f
 
-rsync -av src /cdrom/project/Context7-Explorer/
+rsync -av src tests /cdrom/project/Context7-Explorer/
 rsync -av app components lib server /cdrom/project/Context7-Explorer/
-
-cd .. ; pwd ; rm -rf ttt4
 
 $ :%s/^# app\//# File: app\//  
 
@@ -19,8 +15,6 @@ git commit -m "update docs"
 git status
 
 git push -u origin main
-
-systemctl suspend
 
 ---
 excellent result so far! please proceed with the next step in your plan to cover the main Roadmap goals as noted in your updated README.md. remember to explore carefully for multiple implementation options before choosing the most optimal and elegant solution to implement the changes. so you have to think deeply and systematically to explore all options and not just choose any option you may think of. also make sure you make a detailed execution plan with an integrated checklist for each step, before proceeding cautiously step by step. after completing each step, always double-check and validate your changes for that step against its checklist before proceeding to the next step. remember to always create a *complete* and updated replacement or new file for the affected files, enclose each complete and updated replacement file within ```py (or ```sql or ```js or or ```ts or ```tsx ```php extension) opening and ``` closing tags. after creating each file, use line by line "diff" command to double-check and validate the created file. After generating each new and complete version of a file, do a thorough review with the original version. after creating each file, use line by line "diff" command to double-check and validate the created file. Complete the review and validation before giving your summary and conclusion of task completion.
@@ -31,7 +25,7 @@ The important point is to proceed very carefully so as not to introduce any regr
 Below is "diff" command output comparing the previous version with your latest generated version. Please double-check and validate that the changes are valid and that no other original features or functions are lost (omitted). use the same rigorous and meticulous approach to review the diff output below.
 
 ---
-You really need to put in more effort to use extensive web searches to dig deeper to validate your assumptions. You can review the attached suggested fix, use extensive web searches to validate the fix very deeply, systematically and carefully!
+You really need to put in more effort to use extensive web searches to dig deeper to validate your assumptions. You can review the attached suggested fix, use extensive web searches to validate the fix very deeply, systematically and carefully! Give me the reference of the external sources that you used at the end of reply (answer).
 
 please carefully review the errors and then plan to fix them. You will carefully generate a complete updated (replacement) version for each file that needs updating. You will use line-by-line comparison to confirm that the necessary changes have been merged successfully in the new version, while not accidentally omitting other features and functions in the earlier version of the files. Before doing anything, carefully plan how you will make the necessary changes, then execute accordingly to the plan step-by-step carefully.
 
