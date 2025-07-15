@@ -1,0 +1,6 @@
+openai
+pydantic-ai
+textual
+rich
+httpx
+websockets

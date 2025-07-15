@@ -1,0 +1,19 @@
+{
+  "name": "context7-mcp-server",
+  "version": "1.0.0",
+  "description": "Context7 MCP server exposing search_docs, bookmark_doc & list_bookmarks over WebSocket",
+  "private": true,
+  "main": "mcp_server.js",
+  "scripts": {
+    "start": "node mcp_server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.15.1",
+    "express": "^4.18.2",
+    "ws": "^8.18.3"
+  },
+  "license": "MIT"
+}
