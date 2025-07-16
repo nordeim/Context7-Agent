@@ -33,7 +33,6 @@ Step 4: Detailed execution plan.
 - Add to themes.py: More detailed styles, including gradient simulations (e.g., color transitions).
 - Validate: Ensure code runs without errors, themes switch smoothly, searches feel live.
 - Final: Provide updated files, focusing on changes for the re-imagined app.
-</think>
 
 # Re-Imagined Context7 Agent CLI
 
