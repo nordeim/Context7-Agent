@@ -1,0 +1,6 @@
+pydantic_ai 
+rich
+openai      
+python-dotenv
+pytest
+anyio
