@@ -8,7 +8,7 @@ The agent uses an OpenAI model with configuration from environment variables.
 
 import os
 import sys
-from typing import Dict, Optional, List, Union, AsyncGenerator
+from typing import Dict, Any, Optional, List, Union, AsyncGenerator
 
 import anyio
 import openai
@@ -37,26 +37,41 @@ class Context7Agent:
     def __init__(self):
         """
         Initialize the Context7 Agent with configuration from environment variables.
+
+        Sets up the OpenAI model, providers, and Context7 MCP server integration
+        following a robust, stable, and asynchronous pattern.
         """
         error = config.validate()
         if error:
             raise ValueError(error)
 
+        # 1. Create the provider for its synchronous client and for the Agent model.
         self.provider = OpenAIProvider(
             api_key=config.openai_api_key,
             base_url=config.openai_base_url,
         )
+
+        # 2. Create a dedicated async client for our async methods (chat, recommendations).
         self.async_client = openai.AsyncOpenAI(
             api_key=config.openai_api_key,
             base_url=config.openai_base_url,
         )
+
+        # 3. Create the pydantic-ai model wrapper, passing the provider.
         self.llm = OpenAIModel(
             model_name=config.openai_model, provider=self.provider
         )
+
+        # 4. Configure the MCP server.
         self.mcp_server = MCPServerStdio(
             **config.mcp_config["mcpServers"]["context7"]
         )
+
+        # 5. Create the agent, passing the model and MCP servers.
+        #    The agent will manage the MCP server's lifecycle via an async context manager.
         self.agent = Agent(model=self.llm, mcp_servers=[self.mcp_server])
+
+        # 6. Initialize history.
         self.history = History()
 
     def detect_intent(self, message: str, context: List[Dict]) -> str:
@@ -73,47 +88,39 @@ class Context7Agent:
             return "command"
         return "chat"
 
-    # CRITICAL FIX: Separated generator from function returning a value.
-    async def stream_mcp_results(
+    async def query_mcp(
         self, query: str, filters: Optional[Dict] = None
     ) -> AsyncGenerator[Dict, None]:
-        """
-        Streams query results from MCP. This function ONLY yields documents.
-        """
+        """Stream query results from Context7 MCP (simulated async streaming for demo)."""
         mock_docs = [
-            {"id": 1, "title": f"Doc on {query}", "content": f"This is the full content for the document about '{query}'. It contains detailed information and examples.", "tags": ["ai"], "date": "2025-07-13"},
-            {"id": 2, "title": f"Advanced {query}", "content": f"This document provides a deep dive into advanced concepts related to '{query}'.", "tags": ["ethics"], "date": "2025-07-12"},
-            {"id": 3, "title": f"Related to {query}", "content": f"Here is some information on topics similar to '{query}', offering broader context.", "tags": ["tech"], "date": "2025-07-11"},
+            {"id": 1, "title": f"Doc on {query}", "content": f"Sample content about {query}.", "tags": ["ai"], "date": "2025-07-13"},
+            {"id": 2, "title": f"Advanced {query}", "content": f"Deep dive into {query}.", "tags": ["ethics"], "date": "2025-07-12"},
+            {"id": 3, "title": f"Related to {query}", "content": "More info on similar topics.", "tags": ["tech"], "date": "2025-07-11"},
         ]
         results = [doc for doc in mock_docs if fuzzy_match(query, doc["title"])]
         if filters:
             results = [d for d in results if all(d.get(k) == v for k, v in filters.items())]
 
-        self.history.add_search(query, results)
-        
+        streamed_results = []
         for doc in results:
-            await anyio.sleep(0.5)
+            await anyio.sleep(0.5)  # Simulate non-blocking streaming delay
+            streamed_results.append(doc)
             yield doc
 
-    async def get_mcp_recommendation(self, query: str) -> str:
-        """
-        Generates a conversational recommendation based on a query. This is a regular
-        async function that can use `return` with a value.
-        """
-        rec_prompt = f"Based on the search for '{query}', provide a short, conversational recommendation for what to explore next. Keep it to one or two sentences."
-        response = await self.async_client.chat.completions.create(
+        self.history.add_search(query, streamed_results)
+        
+        # AI recommendations using the async client
+        rec_prompt = f"Recommend similar topics based on: {query}"
+        rec_response = await self.async_client.chat.completions.create(
             model=config.openai_model,
             messages=[{"role": "user", "content": rec_prompt}],
         )
-        return response.choices[0].message.content
+        yield {"recommendation": rec_response.choices[0].message.content}
 
     async def generate_response(
         self, message: str, conversation: List[Dict]
-    ) -> Union[str, Dict]:
-        """
-        Processes a user message. Returns a string for chat/commands,
-        or a dictionary with separated streaming/recommendation functions for search.
-        """
+    ) -> Union[str, AsyncGenerator[Dict, None]]:
+        """Generate response or stream search results using the robust, stable async pattern."""
         intent = self.detect_intent(message, conversation)
         if intent == "search":
             search_query = (
@@ -121,16 +128,11 @@ class Context7Agent:
                 if "about" in message
                 else message.replace("/search", "").strip()
             )
-            # Return a dictionary containing the functions to be called by the CLI.
-            return {
-                "type": "search",
-                "query": search_query,
-                "streamer": self.stream_mcp_results(search_query),
-                "recommender": self.get_mcp_recommendation(search_query)
-            }
+            return self.query_mcp(search_query)
         elif intent == "command":
             return self.handle_command(message)
-        else: # Chat
+        else:
+            # Bypass the buggy `agent.complete` and use the dedicated async client directly.
             raw_msgs = conversation + [{"role": "user", "content": message}]
             response = await self.async_client.chat.completions.create(
                 model=config.openai_model, messages=raw_msgs
@@ -140,7 +142,7 @@ class Context7Agent:
     def handle_command(self, command: str) -> str:
         """Handle hotkey commands."""
         if command == "/help":
-            return "Commands: /search <query>, /preview <id>, /bookmark <id>, /theme <name>, /exit"
+            return "Commands: /search <query>, /preview <id>, /bookmark <id>, /theme <name>, /analytics, /exit"
         elif command.startswith("/bookmark"):
             try:
                 doc_id = int(command.split()[-1])
@@ -170,5 +172,5 @@ class Context7Agent:
         docs = searches[-1]["results"]
         for doc in docs:
             if doc.get("id") == doc_id:
-                return f"[bold]{doc['title']}[/bold]\n\n[italic]{doc['content']}[/italic]"
+                return f"[bold]{doc['title']}[/bold]\n[italic]{doc['content']}[/italic]"
         return "Doc not found in last search results."

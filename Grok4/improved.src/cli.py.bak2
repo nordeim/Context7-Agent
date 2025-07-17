@@ -3,12 +3,12 @@
 CLI module for the Context7 Agent.
 
 Provides a re-imagined, immersive terminal interface with split-screen layout,
-live streaming, advanced animations, and enhanced interactivity with a scrollable chat panel.
+live streaming, advanced animations, and enhanced interactivity.
 """
 
 import os
 import sys
-from typing import AsyncGenerator, Dict
+from typing import AsyncGenerator, Dict, Union
 
 import anyio
 from rich.console import Console
@@ -37,8 +37,6 @@ class CLI:
         self.results = []
         self.bookmarks = self.agent.history.get_bookmarks()
         self.status = "Ready"
-        # CRITICAL FIX: Add state for scrolling chat history
-        self.chat_scroll_offset = 0
         
         self.session_state = self.agent.history.load_session()
         if self.session_state:
@@ -46,11 +44,6 @@ class CLI:
             self.agent.history.data["conversations"] = self.conversation
             self.current_theme = self.session_state.get("theme", "cyberpunk")
             self.styles = get_theme_styles(self.current_theme)
-            self.scroll_to_bottom() # Start at the end of loaded history
-
-    def scroll_to_bottom(self):
-        """Helper to reset scroll to the latest messages."""
-        self.chat_scroll_offset = 0
 
     def make_layout(self) -> Layout:
         """Create dynamic split-screen layout."""
@@ -68,25 +61,12 @@ class CLI:
         art = Text.from_markup(ASCII_ART.get(self.current_theme, ""), justify="center")
         layout["header"].update(Panel(art, style=self.styles["header"]))
         
-        # CRITICAL FIX: Implement scrolling logic for the chat panel
-        # Estimate visible lines based on terminal height, leaving room for panels/prompts
-        visible_chat_lines = max(5, console.height - 15)
-        
-        chat_history = Text()
-        # Calculate the slice of conversation to show based on scroll offset
-        start_index = len(self.conversation) - visible_chat_lines - self.chat_scroll_offset
-        end_index = len(self.conversation) - self.chat_scroll_offset
-        start_index = max(0, start_index)
-        
-        for msg in self.conversation[start_index:end_index]:
+        chat_text = Text()
+        for msg in self.conversation[-20:]: # Show more history
             style = self.styles["chat_user"] if msg["role"] == "user" else self.styles["chat_agent"]
-            chat_history.append(f"{msg['role'].capitalize()}: ", style=f"bold {style}")
-            chat_history.append(f"{msg['content']}\n")
-        
-        chat_title = "Chat"
-        if self.chat_scroll_offset > 0:
-            chat_title = f"Chat (scrolled up {self.chat_scroll_offset} lines)"
-        layout["chat"].update(Panel(chat_history, title=chat_title, style=self.styles["panel"]))
+            chat_text.append(f"{msg['role'].capitalize()}: ", style=f"bold {style}")
+            chat_text.append(f"{msg['content']}\n")
+        layout["chat"].update(Panel(chat_text, title="Chat", style=self.styles["panel"]))
 
         sidebar = Layout(name="sidebar")
         sidebar.split_column(Layout(name="results", ratio=1), Layout(name="bookmarks", ratio=1))
@@ -102,13 +82,12 @@ class CLI:
         sidebar["bookmarks"].update(Panel(bookmarks_text, title="Bookmarks", style=self.styles["panel"]))
         layout["sidebar"].update(sidebar)
 
-        hotkeys = "Hotkeys: /history up|down, /preview <id>, /theme <name>, /exit"
+        hotkeys = "Hotkeys: /help /search /preview <id> /bookmark <id> /theme <name> /exit"
         footer_text = f"{hotkeys}\nStatus: {self.status}"
         layout["footer"].update(Panel(footer_text, style=self.styles["footer"]))
 
     async def run_particle_loader(self, layout: Layout, text: str = "Processing..."):
         """A reusable loader to show processing activity."""
-        self.scroll_to_bottom() # Ensure we're at the bottom before loading
         with Live(layout, console=console, refresh_per_second=10, vertical_overflow="visible") as live:
             progress = Progress(SpinnerColumn(), TextColumn(f"[progress.description]{text}"), transient=True)
             task = progress.add_task(self.styles["particle"], total=None)
@@ -120,7 +99,6 @@ class CLI:
 
     async def run_typing_animation(self, text: str, layout: Layout):
         """Typing animation that uses a temporary Live context."""
-        self.scroll_to_bottom() # Ensure new messages are visible
         self.conversation.append({"role": "assistant", "content": ""})
         
         with Live(layout, console=console, refresh_per_second=20, vertical_overflow="visible") as live:
@@ -139,6 +117,7 @@ class CLI:
         """Main async execution loop."""
         layout = self.make_layout()
         console.clear()
+        self.update_layout(layout)
         await self.run_typing_animation("Welcome! I am your Context7 agent. How can I help?", layout)
 
         async with self.agent.agent.run_mcp_servers():
@@ -156,7 +135,6 @@ class CLI:
                     if user_input.lower() == "/exit":
                         break
                     
-                    self.scroll_to_bottom()
                     self.conversation.append({"role": "user", "content": user_input})
                     self.agent.history.data["conversations"] = self.conversation
                     self.status = "Processing..."
@@ -164,18 +142,9 @@ class CLI:
                     console.clear()
                     console.print(layout)
                     
+                    # Handle commands first as they are synchronous
                     if user_input.startswith("/"):
-                        # CRITICAL FIX: Add history/scrolling commands
-                        if user_input.lower() in ("/history up", "/h up"):
-                            self.chat_scroll_offset = min(len(self.conversation) - 1, self.chat_scroll_offset + 5)
-                            self.status = "Scrolled up."
-                        elif user_input.lower() in ("/history down", "/h down"):
-                            self.chat_scroll_offset = max(0, self.chat_scroll_offset - 5)
-                            self.status = "Scrolled down."
-                        elif user_input.lower() in ("/history top", "/h top"):
-                            self.chat_scroll_offset = len(self.conversation) - 1
-                            self.status = "Scrolled to top."
-                        elif user_input.startswith("/preview"):
+                        if user_input.startswith("/preview"):
                             doc_id = int(user_input.split()[-1])
                             preview = self.agent.preview_document(doc_id)
                             await self.run_typing_animation(preview, layout)
@@ -191,8 +160,9 @@ class CLI:
                         else:
                             response = self.agent.handle_command(user_input)
                             await self.run_typing_animation(response, layout)
-                        continue
+                        continue # Skip to next loop iteration after command
                     
+                    # Handle AI responses (chat and search)
                     await self.run_particle_loader(layout)
                     
                     response_data = await self.agent.generate_response(user_input, self.conversation)
@@ -200,6 +170,8 @@ class CLI:
                     if isinstance(response_data, str):
                         await self.run_typing_animation(response_data, layout)
                     elif isinstance(response_data, dict) and response_data.get("type") == "search":
+                        # CRITICAL FIX: Orchestrate the separated functions
+                        # 1. Stream results to the sidebar
                         self.results = []
                         with Live(layout, console=console, refresh_per_second=10, vertical_overflow="visible") as live:
                             async for item in response_data["streamer"]:
@@ -207,6 +179,7 @@ class CLI:
                                 self.update_layout(layout)
                                 live.refresh()
 
+                        # 2. Add a summary message to the chat
                         summary = f"Results streamed into the sidebar. Use /preview <id> for details."
                         self.conversation.append({"role": "assistant", "content": summary})
                         self.agent.history.data["conversations"] = self.conversation
@@ -214,6 +187,7 @@ class CLI:
                         console.clear()
                         console.print(layout)
 
+                        # 3. Get and display the final recommendation
                         await self.run_particle_loader(layout, "Generating recommendation...")
                         recommendation = await response_data["recommender"]
                         await self.run_typing_animation(recommendation, layout)
