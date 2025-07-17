@@ -1,0 +1,50 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "context7-agent"
+version = "1.0.0"
+description = "Stunning AI agent with Context7 MCP integration and beautiful TUI"
+authors = [
+    {name = "Context7 Agent", email = "agent@context7.ai"}
+]
+readme = "README.md"
+requires-python = ">=3.11"
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+dependencies = [
+    "pydantic-ai[openai]>=0.5.0",
+    "openai>=1.50.0",
+    "rich>=13.7.0",
+    "anyio>=4.2.0",
+    "python-dotenv>=1.0.0",
+    "click>=8.1.7",
+    "aiofiles>=23.2.1",
+    "asyncclick>=8.1.7.2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-asyncio>=0.21.0",
+    "black>=23.0.0",
+    "mypy>=1.7.0",
+]
+
+[project.scripts]
+context7-agent = "src.cli:main"
+
+[tool.black]
+line-length = 88
+target-version = ['py311']
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
