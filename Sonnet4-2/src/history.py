@@ -1,3 +1,4 @@
+# File: src/history.py
 """
 History and session management for the Context7 Agent.
 

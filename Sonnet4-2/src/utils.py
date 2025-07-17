@@ -1,3 +1,4 @@
+# File: src/utils.py
 """
 Utility functions for the Context7 Agent.
 

@@ -1,3 +1,4 @@
+# File: src/config.py
 """
 Configuration module for the Context7 Agent.
 
