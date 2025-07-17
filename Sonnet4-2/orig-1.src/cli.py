@@ -146,28 +146,13 @@ Type your message below to begin!
                 with Live(self._create_main_display(conversation_messages), 
                          console=self.console, refresh_per_second=10) as live:
                     
-                    # Get user input with timeout to prevent hanging
-                    try:
-                        user_input = await asyncio.wait_for(
-                            anyio.to_thread.run_sync(
-                                lambda: Prompt.ask(
-                                    f"[bold {self.current_theme.accent}]You[/]",
-                                    console=self.console
-                                )
-                            ),
-                            timeout=300.0  # 5 minutes for user input
+                    # Get user input in a separate thread to avoid blocking
+                    user_input = await anyio.to_thread.run_sync(
+                        lambda: Prompt.ask(
+                            f"[bold {self.current_theme.accent}]You[/]",
+                            console=self.console
                         )
-                    except asyncio.TimeoutError:
-                        # User input timeout - show message and continue
-                        conversation_messages.append({
-                            "role": "system",
-                            "content": "⏰ Input timeout. Please try again.",
-                            "timestamp": datetime.now(),
-                            "is_error": True
-                        })
-                        live.update(self._create_main_display(conversation_messages))
-                        await asyncio.sleep(1)
-                        continue
+                    )
                     
                     if not user_input.strip():
                         continue
@@ -190,33 +175,14 @@ Type your message below to begin!
                     # Show typing indicator
                     conversation_messages.append({
                         "role": "assistant",
-                        "content": "🤖 Processing...",
+                        "content": "🤖 Thinking...",
                         "timestamp": datetime.now(),
                         "is_typing": True
                     })
                     live.update(self._create_main_display(conversation_messages))
                     
-                    # Process user input with timeout
-                    try:
-                        await asyncio.wait_for(
-                            self._process_user_input(user_input, conversation_messages, live),
-                            timeout=config.openai_timeout * 1.5  # Allow extra time for processing
-                        )
-                    except asyncio.TimeoutError:
-                        # Remove typing indicator
-                        conversation_messages = [msg for msg in conversation_messages if not msg.get("is_typing")]
-                        
-                        # Add timeout error message
-                        error_response = "⏰ Request timed out. This might be due to slow internet or high server load. Please try again!"
-                        conversation_messages.append({
-                            "role": "system",
-                            "content": error_response,
-                            "timestamp": datetime.now(),
-                            "is_error": True
-                        })
-                        
-                        # Update live display
-                        live.update(self._create_main_display(conversation_messages))
+                    # Process user input
+                    await self._process_user_input(user_input, conversation_messages, live)
                     
             except KeyboardInterrupt:
                 await self._handle_exit()
@@ -386,14 +352,7 @@ Type your message below to begin!
                 # If this was a search query, update search results
                 intent_data = await self.agent.detect_intent(user_input)
                 if intent_data["intent"] == "search":
-                    try:
-                        self.search_results = await asyncio.wait_for(
-                            self.agent.search_documents(intent_data["query"]),
-                            timeout=config.mcp_timeout
-                        )
-                    except asyncio.TimeoutError:
-                        self.search_results = []
-                        response += "\n\n⚠️ Note: Document search timed out - showing conversation results only."
+                    self.search_results = await self.agent.search_documents(intent_data["query"])
             
             # Remove typing indicator
             conversation_messages = [msg for msg in conversation_messages if not msg.get("is_typing")]
@@ -411,36 +370,12 @@ Type your message below to begin!
             # Update live display
             live.update(self._create_main_display(conversation_messages))
             
-        except asyncio.TimeoutError:
-            # Remove typing indicator
-            conversation_messages = [msg for msg in conversation_messages if not msg.get("is_typing")]
-            
-            # Add timeout error message
-            error_response = "⏰ Request timed out. This might be due to slow internet or high server load. Please try again!"
-            conversation_messages.append({
-                "role": "system",
-                "content": error_response,
-                "timestamp": datetime.now(),
-                "is_error": True
-            })
-            
-            # Update live display
-            live.update(self._create_main_display(conversation_messages))
-            
         except Exception as e:
             # Remove typing indicator
             conversation_messages = [msg for msg in conversation_messages if not msg.get("is_typing")]
             
-            # Add error message with helpful context
-            if "timeout" in str(e).lower():
-                error_response = "⏰ Connection timeout. Please check your internet connection and try again!"
-            elif "network" in str(e).lower() or "connection" in str(e).lower():
-                error_response = "🌐 Network issue detected. Please check your internet connection!"
-            elif "api key" in str(e).lower():
-                error_response = "🔑 API configuration issue. Please check your OpenAI API key!"
-            else:
-                error_response = f"❌ I encountered an issue: {e}"
-                
+            # Add error message
+            error_response = f"I apologize, but I encountered an error: {e}"
             conversation_messages.append({
                 "role": "system",
                 "content": error_response,

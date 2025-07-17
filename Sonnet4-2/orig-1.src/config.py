@@ -26,13 +26,6 @@ class Config:
     mcp_server_command: str
     mcp_server_args: list[str]
     
-    # Timeout Configuration
-    openai_timeout: float
-    mcp_timeout: float
-    network_timeout: float
-    user_input_timeout: float
-    max_total_request_timeout: float
-    
     # Application Settings
     max_history: int
     session_timeout: int
@@ -61,13 +54,6 @@ class Config:
             # Context7 MCP Configuration
             mcp_server_command=os.getenv("MCP_SERVER_COMMAND", "npx"),
             mcp_server_args=os.getenv("MCP_SERVER_ARGS", "-y,@upstash/context7-mcp@latest").split(","),
-            
-            # Timeout Configuration
-            openai_timeout=float(os.getenv("OPENAI_TIMEOUT", "30.0")),
-            mcp_timeout=float(os.getenv("MCP_TIMEOUT", "15.0")),  # Increased for slow MCP servers
-            network_timeout=float(os.getenv("NETWORK_TIMEOUT", "5.0")),
-            user_input_timeout=float(os.getenv("USER_INPUT_TIMEOUT", "300.0")),  # 5 minutes for user input
-            max_total_request_timeout=float(os.getenv("MAX_TOTAL_REQUEST_TIMEOUT", "60.0")),  # Max for retries
             
             # Application Settings
             max_history=int(os.getenv("MAX_HISTORY", "1000")),
