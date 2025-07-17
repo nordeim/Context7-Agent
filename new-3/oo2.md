@@ -3050,12 +3050,6 @@ class QuantumSearchEngine:
                 # Combine quantum probabilities
                 unique_results[key]['quantum_probability'] += result['quantum_probability']
         
-        return list(unique_results
-I'll continue from where I left off with the Quantum Search Engine and complete the remaining modules:
-
-### 8. Quantum Search Engine (`core/quantum_search.py`) - Continued
-
-```python
         return list(unique_results.values())
     
     def _generate_query_variations(self, query: str) -> List[str]:
