@@ -1,0 +1,8 @@
+pydantic-ai>=0.5.0
+rich>=13.0.0
+openai>=1.0.0
+anyio>=4.0.0
+aiofiles>=23.0.0
+python-dotenv>=1.0.0
+pytest>=7.0.0
+pytest-asyncio>=0.21.0
