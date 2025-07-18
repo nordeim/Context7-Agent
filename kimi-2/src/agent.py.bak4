@@ -1,6 +1,6 @@
 """
 Production-ready AI agent with Pydantic AI and MCP integration.
-Fixed import paths and message class names for v0.5+ compatibility.
+Uses native Pydantic AI message patterns for maximum reliability.
 """
 
 import asyncio
@@ -13,6 +13,7 @@ from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
 from pydantic_ai.models.openai import OpenAIModel
 from pydantic_ai.providers.openai import OpenAIProvider
+from pydantic_ai.messages import UserPrompt, SystemPrompt
 
 from .config import config
 from .history import HistoryManager
@@ -23,7 +24,7 @@ class Context7Agent:
     """Production-ready AI agent with native Pydantic AI integration."""
     
     def __init__(self):
-        """Initialize with correct Pydantic AI v0.5+ patterns."""
+        """Initialize with proper Pydantic AI patterns."""
         self.provider = OpenAIProvider(
             api_key=config.openai_api_key,
             base_url=config.openai_base_url
@@ -44,7 +45,8 @@ class Context7Agent:
             mcp_servers=[self.mcp_server],
             system_prompt="""You are Context7, an advanced AI assistant with access to a vast knowledge base.
             You can search, analyze, and present documents in real-time. Be helpful, concise, and engaging.
-            When users ask about topics, use the search tools to find relevant documents and provide summaries."""
+            When users ask about topics, use the search tools to find relevant documents and provide summaries.
+            Always provide accurate, helpful responses based on the available context."""
         )
         
         self.history = HistoryManager()
@@ -58,30 +60,31 @@ class Context7Agent:
         message: str, 
         conversation_id: Optional[str] = None
     ) -> AsyncGenerator[Dict[str, Any], None]:
-        """Stream chat responses using correct Pydantic AI patterns."""
+        """Stream chat responses using native Pydantic AI patterns."""
         
         try:
             async with self.agent.run_mcp_servers():
-                # Build conversation history
+                # Get conversation history
                 history = self.history.get_messages(conversation_id or "default")
                 
-                # Create proper message structure for Pydantic AI
-                messages = []
+                # Build conversation context efficiently
+                context_messages = []
                 for msg in history[-6:]:  # Last 6 messages for context
                     if msg["role"] == "user":
-                        messages.append({"role": "user", "content": msg["content"]})
+                        context_messages.append({"role": "user", "content": msg["content"]})
                     elif msg["role"] == "assistant":
-                        messages.append({"role": "assistant", "content": msg["content"]})
+                        context_messages.append({"role": "assistant", "content": msg["content"]})
                 
                 # Use Pydantic AI's native run method
                 result = await self.agent.run(
                     message,
-                    message_history=messages
+                    message_history=context_messages
                 )
                 
                 # Stream the response
                 content = str(result.data)
                 
+                # Yield complete response (Pydantic AI handles streaming internally)
                 yield {
                     "type": "content",
                     "data": content,
@@ -105,7 +108,7 @@ class Context7Agent:
             logger.error(f"Agent error: {e}")
             yield {
                 "type": "error",
-                "data": str(e),
+                "data": f"Error processing request: {str(e)}",
                 "timestamp": datetime.now().isoformat()
             }
     
