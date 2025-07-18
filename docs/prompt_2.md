@@ -15,3 +15,6 @@ Please put on your deep-thinking hat to deeply and meticulous do your code revie
 ---
 awesome review and analysis! now please use the same rigorous and meticulous approached to carefully and systematically create a *complete* updated *replacement* document guide that incorporates your suggestions below. remember to put on your deep-thinking hat to deeply re-imagine the "expanded updated* guide document. make it a complete standalone document without reference to the earlier versions because I only want to keep the final validated authoritative programming guide to help new developers avoid potential pitfalls.
 
+---
+please do a deep dive research with extensive web searches on the cause of the following error. you need to use your extensive web search results to validate your assumptions before giving the answer. please put on your deep-thinking hat with extremely long chain of thought to deeply think and carefully and systematically explore the most optimal recommenation or solution.
+
