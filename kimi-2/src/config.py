@@ -6,13 +6,24 @@ Handles environment variables and MCP server configuration.
 import os
 from typing import Dict, Any, Optional
 from pathlib import Path
-from pydantic import BaseModel, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings, SettingsConfigDict
 import json
 
-class Config(BaseModel):
-    """Application configuration with validation."""
+class Config(BaseSettings):
+    """Application configuration with environment variable support."""
     
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_prefix="CONTEXT7_",
+        case_sensitive=False,
+        extra="ignore"
+    )
+    
+    # Required fields
     openai_api_key: str = Field(..., description="OpenAI API key")
+    
+    # Optional fields with defaults
     openai_base_url: str = Field(
         default="https://api.openai.com/v1",
         description="OpenAI API base URL"
@@ -22,11 +33,11 @@ class Config(BaseModel):
         description="OpenAI model to use"
     )
     mcp_config_path: Path = Field(
-        default=Path.home() / ".context7" / "mcp.json",
+        default_factory=lambda: Path.home() / ".context7" / "mcp.json",
         description="Path to MCP configuration"
     )
     history_path: Path = Field(
-        default=Path.home() / ".context7" / "history.json",
+        default_factory=lambda: Path.home() / ".context7" / "history.json",
         description="Path to conversation history"
     )
     max_history: int = Field(
@@ -34,12 +45,8 @@ class Config(BaseModel):
         description="Maximum conversation history entries"
     )
     
-    class Config:
-        env_file = ".env"
-        env_prefix = "CONTEXT7_"
-
-    def __init__(self, **data):
-        super().__init__(**data)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
         self._ensure_directories()
     
     def _ensure_directories(self):
