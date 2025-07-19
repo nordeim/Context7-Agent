@@ -24,3 +24,13 @@ awesome job! now the app works beautifully with out error. Please create a troub
 ---
 awesome job, please put on your deep-thinking hat to deeply think and carefully and thoroughly explore the best possible option to add your insights, recommendations, summaries of findings and lessons to the attached document. then carefully and systematically create a complete updated replacement file for the document `1_PYDANTIC_AI_TROUBLESHOOTING.md`. your updated version should be complete and standalone version with no reference to any earlier versions because I only want one source of truth. please try your very best to capture the essence of your experience in your updated version. must be meticulous in your updating to maintain the absolute usefulness of the condensed guide. it is meant to be somewhat like a cheat sheet for similar software. thank you and good luck.
 
+---
+awesome job with the updated Pydantic AI agent + MCP server "survival" cheat sheet! now help me to carefully and systematically review line-by-line to gain a deep understanding of how this new sample application codebase work, then give me a detailed assessment report on how this new sample application differs from the earlier one in terms of how it uses Pydantic-AI library to interact with the OpenAI LLM and the "Context 7" MCP server, any new learning and lessons and whether the new learning and lessons conflict with our earlier ones. 
+
+Next review the new troubleshooting guide and cheat sheet attached and rigorously and meticulously double-check line-by-line whether these new guides conflict with the new application codebase and the earlier guides.
+
+Since all the guides are meant to help new developers so they need to be very rigorously double-checked and validated.
+
+---
+absolutely excellent analysis and assessment! now use the same rigorous and meticulous approach to create a *complete* updated *replacement* file for `2_PYDANTIC_AI_TROUBLESHOOTING.md` that incorporates your following recommedation. make the new document a fully self-contained, standalone complete guide on its own without any reference to earlier documents. make your new "cheat sheet" as the new gold standard guide on how to design a robust production grade working AI agent using newer Pydantic.AI library with OpenAI LLM and MCP server tool calling. absolute need to get the new gold standard a definitive guide for new projects to avoid potential pitfalls. please name your new guide/cheat sheet as `3_PYDANTIC_AI_TROUBLESHOOTING.md` to denote version 3. please try your very best and good luck! 
+
