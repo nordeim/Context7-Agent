@@ -5,6 +5,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.live import Live
 from rich.syntax import Syntax
+from rich.text import Text
 
 import os
 from typing import List, Dict
@@ -59,84 +60,100 @@ async def main():
     bookmarks = agent.history.get_bookmarks()
     last_results: List[Dict] = []
 
-    async with agent.agent.agent.run_mcp_servers():
-        while True:
-            try:
-                user_input = await anyio.to_thread.run_sync(
-                    lambda: Prompt.ask("[bold cyan]You[/bold cyan]")
-                )
-            except (KeyboardInterrupt, EOFError):
-                console.print("\n[bold magenta]Goodbye![/bold magenta]")
-                break
-
-            if not user_input.strip():
-                continue
-
-            if user_input.lower() == "/exit":
-                console.print("[bold magenta]Goodbye![/bold magenta]")
-                break
-            elif user_input.lower() == "/help":
-                print_help()
-                continue
-            elif user_input.startswith("/theme"):
-                parts = user_input.split()
-                if len(parts) > 1 and parts[1] in get_theme.__annotations__:
-                    theme = parts[1]
-                else:
-                    theme = parts[1] if len(parts) > 1 else "cyberpunk"
-                console.pop_theme()
-                console.push_theme(get_theme(theme))
-                print_ascii_art(theme)
-                continue
-            elif user_input.lower() == "/history":
-                table = Table(title="Conversation History")
-                table.add_column("Role")
-                table.add_column("Message")
-                for msg in history:
-                    table.add_row(msg.get("role", ""), msg.get("content", ""))
-                console.print(table)
-                continue
-            elif user_input.startswith("/bookmark"):
+    try:
+        # Create MCP server for the entire session
+        mcp_server = MCPServerStdio(
+            command="npx",
+            args=["-y", "@upstash/context7-mcp@latest"],
+        )
+        
+        console.print("[dim]Starting MCP server...[/dim]")
+        
+        async with agent.agent.run_mcp_servers([mcp_server]):
+            console.print("[green]✅ MCP server connected successfully[/green]")
+            
+            while True:
                 try:
-                    idx = int(user_input.split()[1]) - 1
-                    doc = last_results[idx]
-                    agent.history.add_bookmark(doc)
-                    console.print(format_success("Bookmarked!"))
-                except Exception:
-                    console.print(format_error("Could not bookmark."))
-                continue
-            elif user_input.startswith("/preview"):
+                    user_input = await anyio.to_thread.run_sync(
+                        lambda: Prompt.ask("[bold cyan]You[/bold cyan]")
+                    )
+                except (KeyboardInterrupt, EOFError):
+                    console.print("\n[bold magenta]Goodbye![/bold magenta]")
+                    break
+
+                if not user_input.strip():
+                    continue
+
+                if user_input.lower() == "/exit":
+                    console.print("[bold magenta]Goodbye![/bold magenta]")
+                    break
+                elif user_input.lower() == "/help":
+                    print_help()
+                    continue
+                elif user_input.startswith("/theme"):
+                    parts = user_input.split()
+                    if len(parts) > 1 and parts[1] in ["cyberpunk", "ocean", "forest", "sunset"]:
+                        theme = parts[1]
+                        console.pop_theme()
+                        console.push_theme(get_theme(theme))
+                        print_ascii_art(theme)
+                        console.print(f"[green]Theme switched to {theme}[/green]")
+                    else:
+                        console.print("[red]Invalid theme. Use: cyberpunk, ocean, forest, sunset[/red]")
+                    continue
+                elif user_input.lower() == "/history":
+                    table = Table(title="Conversation History")
+                    table.add_column("Role")
+                    table.add_column("Message")
+                    for msg in history:
+                        table.add_row(msg.get("role", ""), msg.get("content", "")[:100] + "...")
+                    console.print(table)
+                    continue
+                elif user_input.startswith("/bookmark"):
+                    try:
+                        idx = int(user_input.split()[1]) - 1
+                        doc = last_results[idx]
+                        agent.history.add_bookmark(doc)
+                        console.print(format_success("Bookmarked!"))
+                    except (IndexError, ValueError):
+                        console.print(format_error("Invalid bookmark index."))
+                    continue
+                elif user_input.startswith("/preview"):
+                    try:
+                        idx = int(user_input.split()[1]) - 1
+                        doc = last_results[idx]
+                        content = doc.get("content", "")
+                        filetype = doc.get("type", "txt")
+                        syntax = Syntax(content, filetype, theme="monokai", line_numbers=True)
+                        console.print(syntax)
+                    except (IndexError, ValueError):
+                        console.print(format_error("Invalid preview index."))
+                    continue
+                elif user_input.lower() == "/analytics":
+                    console.print("[bold yellow]Analytics coming soon![/bold yellow]")
+                    continue
+
+                # Animated loader
+                await render_loader(get_animation_frames(theme), duration=1.5)
+
+                # Intent detection: if user asks about a subject, auto-search via MCP
                 try:
-                    idx = int(user_input.split()[1]) - 1
-                    doc = last_results[idx]
-                    content = doc.get("content", "")
-                    filetype = doc.get("type", "txt")
-                    syntax = Syntax(content, filetype, theme="monokai", line_numbers=True)
-                    console.print(syntax)
-                except Exception:
-                    console.print(format_error("Could not preview document."))
-                continue
-            elif user_input.lower() == "/analytics":
-                # Dummy analytics for now
-                console.print("[bold yellow]Analytics coming soon![/bold yellow]")
-                continue
-
-            # Animated loader
-            await render_loader(get_animation_frames(theme), duration=1.5)
-
-            # Intent detection: if user asks about a subject, auto-search via MCP
-            try:
-                response = await agent.chat(user_input, history)
-                # Assume response may include search results (if RAG)
-                console.print(Panel(response, title="Agent", style="primary"))
-                history.append({"role": "user", "content": user_input})
-                history.append({"role": "assistant", "content": response})
-                await agent.save_history()
-                # Optionally: parse/search results here to populate last_results for /preview, /bookmark
-                # For now, stub it:
-                last_results = []
-            except Exception as e:
-                console.print(format_error(str(e)))
+                    response = await agent.chat(user_input, history)
+                    console.print(Panel(response, title="Agent", style="primary"))
+                    history.append({"role": "user", "content": user_input})
+                    history.append({"role": "assistant", "content": response})
+                    await agent.save_history()
+                    # For now, last_results remains empty until we implement result parsing
+                    last_results = []
+                except Exception as e:
+                    console.print(format_error(str(e)))
+                    console.print("[dim]Please check your API key and internet connection[/dim]")
+                    
+    except Exception as e:
+        console.print(f"[red]❌ Failed to start MCP server: {e}[/red]")
+        console.print("[yellow]Please ensure Node.js is installed and @upstash/context7-mcp is available[/yellow]")
+    finally:
+        console.print("[yellow]🔄 Shutting down gracefully...[/yellow]")
 
 if __name__ == "__main__":
     try:

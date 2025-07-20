@@ -1,5 +1,5 @@
 import os
-from typing import List
+from typing import Optional
 from pydantic import BaseModel
 from dotenv import load_dotenv
 
@@ -37,26 +37,11 @@ class Config(BaseModel):
     @classmethod
     def load(cls) -> "Config":
         load_dotenv()
-        
-        api_key = os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError(
-                "OPENAI_API_KEY is required. Please set it as an environment variable:\n"
-                "export OPENAI_API_KEY='your-key-here'\n"
-                "Or create a .env file with OPENAI_API_KEY=your-key-here"
-            )
-        
-        theme = os.getenv("CONTEXT7_THEME", "cyberpunk")
-        if theme not in THEMES:
-            raise ValueError(
-                f"Invalid theme '{theme}'. Must be one of: {', '.join(THEMES)}"
-            )
-        
         return cls(
-            openai_api_key=api_key,
+            openai_api_key=os.getenv("OPENAI_API_KEY", ""),
             openai_base_url=os.getenv("OPENAI_BASE_URL", "https://api.openai.com/v1"),
             openai_model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
             rag_system_prompt=os.getenv("RAG_SYSTEM_PROMPT", DEFAULT_PROMPT),
-            theme=theme,
+            theme=os.getenv("CONTEXT7_THEME", "cyberpunk"),
             history_file=os.getenv("CONTEXT7_HISTORY_FILE", os.path.expanduser("~/.context7_history.json"))
         )

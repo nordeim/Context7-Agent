@@ -32,11 +32,17 @@ class Context7Agent:
             provider=self.provider,
         )
 
-        # Agent - MCP servers will be attached at runtime
+        # MCP server (Context7)
+        self.mcp_server = MCPServerStdio(
+            command="npx",
+            args=["-y", "@upstash/context7-mcp@latest"],
+        )
+
+        # Gold-standard RAG system prompt
         self.agent = Agent(
             model=self.model,
+            mcp_servers=[self.mcp_server],
             system_prompt=config.rag_system_prompt
-            # MCP servers will be provided at runtime via run_mcp_servers()
         )
 
         # History manager
@@ -51,38 +57,21 @@ class Context7Agent:
     ) -> str:
         """
         Processes a user query via the unified agent.run() method.
-        MCP server lifecycle is managed internally for each call.
+        MCP server lifecycle must be managed by the caller.
         """
         message_history = message_history or []
-        
-        # Create MCP server at runtime
-        mcp_server = MCPServerStdio(
-            command="npx",
-            args=["-y", "@upstash/context7-mcp@latest"],
-        )
-        
-        async with self.agent.run_mcp_servers([mcp_server]):
-            result = await self.agent.run(user_text, message_history=message_history)
-            return str(result.data)
+        result = await self.agent.run(user_text, message_history=message_history)
+        return str(result.data)
 
     async def chat_stream(
         self, user_text: str, message_history: Optional[List[Dict]] = None
     ):
         """
         Streams the chat response (for live/animated UI).
-        MCP server lifecycle is managed internally for each call.
         """
         message_history = message_history or []
-        
-        # Create MCP server at runtime
-        mcp_server = MCPServerStdio(
-            command="npx",
-            args=["-y", "@upstash/context7-mcp@latest"],
-        )
-        
-        async with self.agent.run_mcp_servers([mcp_server]):
-            async for chunk in self.agent.run_stream(user_text, message_history=message_history):
-                yield chunk
+        async for chunk in self.agent.run_stream(user_text, message_history=message_history):
+            yield chunk
 
     def get_history(self):
         return self.history.history
