@@ -1,0 +1,10 @@
+# Pinned for API stability and reproducibility
+pydantic-ai>=0.5,<1.0
+pydantic>=2.0
+openai>=1.0
+anyio>=3.7
+python-dotenv>=1.0
+rich>=13.0
+pytest>=7.0
+pytest-anyio>=0.0.0
+pygments>=2.16
