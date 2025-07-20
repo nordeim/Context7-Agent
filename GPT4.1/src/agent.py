@@ -1,5 +1,6 @@
 import os
 from typing import Optional, List, Dict, Any
+import logging
 
 from pydantic_ai import Agent
 from pydantic_ai.mcp import MCPServerStdio
@@ -8,6 +9,10 @@ from pydantic_ai.providers.openai import OpenAIProvider
 
 from .config import Config
 from .history import HistoryManager
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 class Context7Agent:
@@ -44,7 +49,28 @@ class Context7Agent:
 
     async def initialize(self):
         """Load persisted history and prepare agent."""
-        await self.history.load_async()
+        try:
+            await self.history.load_async()
+            logger.info("Agent initialized successfully")
+        except Exception as e:
+            logger.error(f"Failed to load history: {e}")
+            raise
+
+    def create_mcp_server(self) -> MCPServerStdio:
+        """Create MCP server with proper error handling."""
+        import shutil
+        
+        npx_path = shutil.which("npx")
+        if not npx_path:
+            raise RuntimeError(
+                "npx not found in PATH. Please install Node.js 18+ and ensure npm is available."
+            )
+        
+        return MCPServerStdio(
+            command=npx_path,
+            args=["-y", "@upstash/context7-mcp@latest"],
+            env=os.environ
+        )
 
     async def chat(
         self, user_text: str, message_history: Optional[List[Dict]] = None
@@ -53,17 +79,22 @@ class Context7Agent:
         Processes a user query via the unified agent.run() method.
         MCP server lifecycle is managed internally for each call.
         """
+        if not user_text.strip():
+            return "I didn't receive any input. Please try again."
+
         message_history = message_history or []
         
-        # Create MCP server at runtime
-        mcp_server = MCPServerStdio(
-            command="npx",
-            args=["-y", "@upstash/context7-mcp@latest"],
-        )
-        
-        async with self.agent.run_mcp_servers([mcp_server]):
-            result = await self.agent.run(user_text, message_history=message_history)
-            return str(result.data)
+        try:
+            mcp_server = self.create_mcp_server()
+            
+            async with self.agent.run_mcp_servers([mcp_server]):
+                logger.debug(f"Processing query: {user_text}")
+                result = await self.agent.run(user_text, message_history=message_history)
+                return str(result.data)
+                
+        except Exception as e:
+            logger.error(f"Chat error: {e}")
+            return f"I encountered an error: {str(e)}. Please check your configuration and try again."
 
     async def chat_stream(
         self, user_text: str, message_history: Optional[List[Dict]] = None
@@ -72,20 +103,33 @@ class Context7Agent:
         Streams the chat response (for live/animated UI).
         MCP server lifecycle is managed internally for each call.
         """
+        if not user_text.strip():
+            yield "I didn't receive any input. Please try again."
+            return
+
         message_history = message_history or []
         
-        # Create MCP server at runtime
-        mcp_server = MCPServerStdio(
-            command="npx",
-            args=["-y", "@upstash/context7-mcp@latest"],
-        )
-        
-        async with self.agent.run_mcp_servers([mcp_server]):
-            async for chunk in self.agent.run_stream(user_text, message_history=message_history):
-                yield chunk
+        try:
+            mcp_server = self.create_mcp_server()
+            
+            async with self.agent.run_mcp_servers([mcp_server]):
+                logger.debug(f"Streaming query: {user_text}")
+                async for chunk in self.agent.run_stream(user_text, message_history=message_history):
+                    yield chunk
+                    
+        except Exception as e:
+            logger.error(f"Streaming error: {e}")
+            yield f"Streaming error: {str(e)}"
 
     def get_history(self):
+        """Get conversation history."""
         return self.history.history
 
     async def save_history(self):
-        await self.history.save_async()
+        """Save conversation history."""
+        try:
+            await self.history.save_async()
+            logger.info("History saved successfully")
+        except Exception as e:
+            logger.error(f"Failed to save history: {e}")
+            raise

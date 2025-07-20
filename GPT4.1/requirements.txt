@@ -1,10 +1,14 @@
-# Pinned for API stability and reproducibility
-pydantic-ai>=0.5,<1.0
-pydantic>=2.0
-openai>=1.0
-anyio>=3.7
-python-dotenv>=1.0
-rich>=13.0
-pytest>=7.0
-pytest-anyio>=0.0.0
-pygments>=2.16
+# Core dependencies - pinned for reproducibility
+pydantic-ai[openai]==0.4.2
+pydantic==2.11.7
+python-dotenv==1.1.1
+anyio==4.9.0
+rich==14.0.0
+aiofiles==24.1.0
+
+# OpenAI integration
+openai==1.95.1
+
+# Production utilities
+typing-extensions==4.14.1
+```
