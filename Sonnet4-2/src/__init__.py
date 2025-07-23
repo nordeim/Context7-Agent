@@ -9,20 +9,22 @@ interface with themes, animations, and conversational interactions.
 
 from .agent import Context7Agent
 from .config import config
-from .themes import get_theme, list_themes
-from .history import ConversationHistory, SearchHistory, BookmarkManager, SessionManager
+# We also expose 'Theme' as it's used for type hinting in the CLI
+from .themes import get_theme, list_themes, Theme
+# This import is corrected to reflect the refactored, simpler HistoryManager
+from .history import HistoryManager
 
-__version__ = "1.0.0"
+# Version is bumped to 2.0.0 to signify the major architectural refactoring
+__version__ = "2.0.0"
 __author__ = "Context7 Agent Team"
-__email__ = "agent@context7.ai"
+__email__ = "agent@context7.ai"   
 
+# The __all__ list is updated to define the new, correct public API
 __all__ = [
     "Context7Agent",
-    "config", 
+    "config",
     "get_theme",
     "list_themes",
-    "ConversationHistory",
-    "SearchHistory", 
-    "BookmarkManager",
-    "SessionManager"
+    "Theme",
+    "HistoryManager"
 ]

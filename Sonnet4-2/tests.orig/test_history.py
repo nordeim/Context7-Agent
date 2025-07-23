@@ -1,3 +1,4 @@
+# File: tests/test_history.py
 """
 Tests for history and session management classes.
 """

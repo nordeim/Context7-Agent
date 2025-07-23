@@ -1,11 +1,29 @@
-pydantic-ai[openai]==0.5.0
-openai>=1.50.0
-rich>=13.7.0
-anyio>=4.2.0
-python-dotenv>=1.0.0
-click>=8.1.7
-aiofiles>=23.2.1
-asyncclick>=8.1.7.2
-pytest>=7.4.0
-pytest-asyncio>=0.21.0
-rich-gradient>=0.3.2
+# File: requirements.txt
+#
+# Core application dependencies for the stable, refactored Context7 Agent.
+# Pinned for reproducible builds.
+
+# Core asynchronous library
+anyio==4.9.0
+
+# Asynchronous file operations
+aiofiles==24.1.0
+
+# OpenAI API client library
+openai==1.95.1
+
+# For robust, type-safe configuration from .env files
+pydantic-settings==2.10.1
+
+# Core data validation library (dependency of pydantic-settings)
+pydantic==2.11.7
+
+# The AI Agentic Framework
+pydantic-ai==0.4.2
+
+# For loading .env files
+python-dotenv==1.1.1
+
+# The library for creating the beautiful Terminal User Interface (TUI)
+rich==14.0.0
+

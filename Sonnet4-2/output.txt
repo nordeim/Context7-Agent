@@ -1,0 +1,198 @@
+╭───────────────────────────────────────────────────────────────────────────────────────────────────────── Welcome to Context7 AI ─────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                                                                                                                                                                                                          │
+│ ╔═══════════════════════════════════════════════════════════╗                                                                                                                                                                            │
+│ ║  ██████╗██╗   ██╗██████╗ ███████╗██████╗ ██████╗ ██╗   ██╗║                                                                                                                                                                            │
+│ ║ ██╔════╝╚██╗ ██╔╝██╔══██╗██╔════╝██╔══██╗██╔══██╗██║   ██║║                                                                                                                                                                            │
+│ ║ ██║      ╚████╔╝ ██████╔╝█████╗  ██████╔╝██████╔╝██║   ██║║                                                                                                                                                                            │
+│ ║ ██║       ╚██╔╝  ██╔══██╗██╔══╝  ██╔══██╗██╔═══╝ ██║   ██║║                                                                                                                                                                            │
+│ ║ ╚██████╗   ██║   ██████╔╝███████╗██║  ██║██║     ╚██████╔╝║                                                                                                                                                                            │
+│ ║  ╚═════╝   ╚═╝   ╚═════╝ ╚══════╝╚═╝  ╚═╝╚═╝      ╚═════╝ ║                                                                                                                                                                            │
+│ ╚═══════════════════════════════════════════════════════════╝                                                                                                                                                                            │
+│                                                                                                                                                                                                                                          │
+╰──────────────────────────────────────────────────────────────────────────────────────────────────────────── Theme: Cyberpunk ────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
+Agent is ready! Type a query or /help for commands.
+
+You: n8n json format
+
+⠧ Assistant is thinking...Context7 Documentation MCP Server running on stdio
+Assistant:
+Based on the documentation retrieved, here's a comprehensive overview of n8n's JSON format:                                                                                                                                                 
+
+
+                                                                                                          n8n JSON Format Overview                                                                                                          
+
+                                                                                                          Standard Data Structure                                                                                                           
+
+n8n uses a specific JSON structure for data passed between nodes:                                                                                                                                                                           
+
+                                                                                                                                                                                                                                            
+ [                                                                                                                                                                                                                                          
+   {                                                                                                                                                                                                                                        
+     "json": {                                                                                                                                                                                                                              
+       "key1": "value1",                                                                                                                                                                                                                    
+       "key2": {                                                                                                                                                                                                                            
+         "nested": "data"                                                                                                                                                                                                                   
+       }                                                                                                                                                                                                                                    
+     },                                                                                                                                                                                                                                     
+     "binary": {                                                                                                                                                                                                                            
+       "file-name": {                                                                                                                                                                                                                       
+         "data": "base64-encoded-data",                                                                                                                                                                                                     
+         "mimeType": "image/png",                                                                                                                                                                                                           
+         "fileExtension": "png",                                                                                                                                                                                                            
+         "fileName": "example.png"                                                                                                                                                                                                          
+       }                                                                                                                                                                                                                                    
+     }                                                                                                                                                                                                                                      
+   }                                                                                                                                                                                                                                        
+ ]                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+
+                                                                                                               Key Components                                                                                                               
+
+ 1 JSON Wrapper: All data must be wrapped in an array of objects                                                                                                                                                                            
+ 2 json Property: Contains the actual data payload                                                                                                                                                                                          
+ 3 binary Property (optional): Contains binary file data                                                                                                                                                                                    
+
+                                                                                                         Common JSON Formats in n8n                                                                                                         
+
+                                                                                                          1. Webhook Input Format                                                                                                           
+
+                                                                                                                                                                                                                                            
+ [                                                                                                                                                                                                                                          
+   {                                                                                                                                                                                                                                        
+     "headers": {},                                                                                                                                                                                                                         
+     "params": {},                                                                                                                                                                                                                          
+     "query": {},                                                                                                                                                                                                                           
+     "body": {                                                                                                                                                                                                                              
+       "name": "Jim",                                                                                                                                                                                                                       
+       "age": 30,                                                                                                                                                                                                                           
+       "city": "New York"                                                                                                                                                                                                                   
+     }                                                                                                                                                                                                                                      
+   }                                                                                                                                                                                                                                        
+ ]                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+
+                                                                                                         2. Workflow Configuration                                                                                                          
+
+                                                                                                                                                                                                                                            
+ {                                                                                                                                                                                                                                          
+   "name": "My Workflow",                                                                                                                                                                                                                   
+   "nodes": [                                                                                                                                                                                                                               
+     {                                                                                                                                                                                                                                      
+       "parameters": {},                                                                                                                                                                                                                    
+       "name": "Start",                                                                                                                                                                                                                     
+       "type": "n8n-nodes-base.start",                                                                                                                                                                                                      
+       "id": "uuid"                                                                                                                                                                                                                         
+     }                                                                                                                                                                                                                                      
+   ],                                                                                                                                                                                                                                       
+   "connections": {},                                                                                                                                                                                                                       
+   "active": false                                                                                                                                                                                                                          
+ }                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+
+                                                                                                        3. Form Field Configuration                                                                                                         
+
+                                                                                                                                                                                                                                            
+ [                                                                                                                                                                                                                                          
+   {                                                                                                                                                                                                                                        
+     "fieldLabel": "Email",                                                                                                                                                                                                                 
+     "fieldType": "email",                                                                                                                                                                                                                  
+     "placeholder": "me@mail.com"                                                                                                                                                                                                           
+   },                                                                                                                                                                                                                                       
+   {                                                                                                                                                                                                                                        
+     "fieldLabel": "Number",                                                                                                                                                                                                                
+     "fieldType": "number"                                                                                                                                                                                                                  
+   }                                                                                                                                                                                                                                        
+ ]                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+
+                                                                                                          JSON Expressions in n8n                                                                                                           
+
+                                                                                                               Accessing Data                                                                                                               
+
+ • Dot notation: {{$json.body.city}}                                                                                                                                                                                                        
+ • Bracket notation: {{$json['body']['city']}}                                                                                                                                                                                              
+
+                                                                                                              JMESPath Queries                                                                                                              
+
+                                                                                                                                                                                                                                            
+ // Extract first names from array                                                                                                                                                                                                          
+ {{$jmespath($json.body.people, "[*].first")}}                                                                                                                                                                                              
+                                                                                                                                                                                                                                            
+ // Filter and extract specific values                                                                                                                                                                                                      
+ {{$jmespath($input.all(), "[?json.name=='Lenovo'].json.category_id")}}                                                                                                                                                                     
+                                                                                                                                                                                                                                            
+
+                                                                                                        HTTP Request JSON Formatting                                                                                                        
+
+                                                                                                       Correct JSON Parameter Format                                                                                                        
+
+                                                                                                                                                                                                                                            
+ {{                                                                                                                                                                                                                                         
+   {                                                                                                                                                                                                                                        
+     "myjson": {                                                                                                                                                                                                                            
+       "name1": "value1",                                                                                                                                                                                                                   
+       "name2": "value2",                                                                                                                                                                                                                   
+       "array1": ["value1", "value2"]                                                                                                                                                                                                       
+     }                                                                                                                                                                                                                                      
+   }                                                                                                                                                                                                                                        
+ }}                                                                                                                                                                                                                                         
+                                                                                                                                                                                                                                            
+
+                                                                                                            Configuration Files                                                                                                             
+
+                                                                                                         n8n Configuration Example                                                                                                          
+
+                                                                                                                                                                                                                                            
+ {                                                                                                                                                                                                                                          
+   "executions": {                                                                                                                                                                                                                          
+     "saveDataOnSuccess": "none"                                                                                                                                                                                                            
+   },                                                                                                                                                                                                                                       
+   "generic": {                                                                                                                                                                                                                             
+     "timezone": "Europe/Berlin"                                                                                                                                                                                                            
+   },                                                                                                                                                                                                                                       
+   "nodes": {                                                                                                                                                                                                                               
+     "exclude": ["n8n-nodes-base.executeCommand"]                                                                                                                                                                                           
+   }                                                                                                                                                                                                                                        
+ }                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+
+                                                                                                        Data Transformation Examples                                                                                                        
+
+                                                                                                       Input to Output Transformation                                                                                                       
+
+                                                                                                                                                                                                                                            
+ // Input                                                                                                                                                                                                                                   
+ [                                                                                                                                                                                                                                          
+   {                                                                                                                                                                                                                                        
+     "id": "23423532",                                                                                                                                                                                                                      
+     "name": "Jay Gatsby"                                                                                                                                                                                                                   
+   }                                                                                                                                                                                                                                        
+ ]                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+ // Output after transformation                                                                                                                                                                                                             
+ [                                                                                                                                                                                                                                          
+   {                                                                                                                                                                                                                                        
+     "id": "23423532",                                                                                                                                                                                                                      
+     "name": "Jay Gatsby",                                                                                                                                                                                                                  
+     "newKey": "new value",                                                                                                                                                                                                                 
+     "array": [23423532, "Jay Gatsby"]                                                                                                                                                                                                      
+   }                                                                                                                                                                                                                                        
+ ]                                                                                                                                                                                                                                          
+                                                                                                                                                                                                                                            
+
+                                                                                                            Common JSON Patterns                                                                                                            
+
+ 1 Multi-item processing: Arrays of objects for batch processing                                                                                                                                                                            
+ 2 Nested objects: Complex hierarchical data structures                                                                                                                                                                                     
+ 3 Binary data handling: Base64-encoded files with metadata                                                                                                                                                                                 
+ 4 Configuration objects: Settings and parameters for nodes                                                                                                                                                                                 
+ 5 Webhook responses: Standard HTTP request/response formats                                                                                                                                                                                
+
+This JSON format ensures consistency across n8n workflows and enables seamless data flow between different nodes and integrations.                                                                                                          
+
+You: /exit
+Exiting...
+
+Shutting down...
+

@@ -11,7 +11,7 @@ from typing import Dict, List, Tuple
 from rich.style import Style
 from rich.text import Text
 from rich.panel import Panel
-#from rich.gradient import Gradient
+from rich.gradient import Gradient
 from rich.console import Console
 
 class Theme:

@@ -1,4 +1,3 @@
-# File: src/themes.py
 """
 Themes and visual styling for the Context7 Agent TUI.
 

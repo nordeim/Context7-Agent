@@ -1,4 +1,3 @@
-# File: tests/__init__.py
 """
 Test suite for the Context7 Agent.
 
