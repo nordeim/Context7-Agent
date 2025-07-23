@@ -1,4 +1,4 @@
-# File: requirements.txt
+# File: requirements.txt 
 #
 # Core application dependencies for the stable, refactored Context7 Agent.
 # Pinned for reproducible builds.
@@ -26,4 +26,14 @@ python-dotenv==1.1.1
 
 # The library for creating the beautiful Terminal User Interface (TUI)
 rich==14.0.0
+
+# --- Test Dependencies ---
+pytest==8.3.5
+pytest-asyncio==0.25.3
+pytest-mock==3.14.0
+pytest-cov==6.0.0
+pytest-xdist==3.6.1
+hypothesis==6.122.3
+freezegun==1.5.1
+aioresponses==0.7.7
 

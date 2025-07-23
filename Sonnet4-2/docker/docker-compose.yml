@@ -1,0 +1,66 @@
+# ==============================================================================
+# Context7 AI Agent - Development Docker Compose
+# ==============================================================================
+
+version: '3.8'
+
+services:
+  context7-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    container_name: context7-dev
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - CONTEXT7_DEFAULT_THEME=${CONTEXT7_DEFAULT_THEME:-cyberpunk}
+      - CONTEXT7_MAX_HISTORY=${CONTEXT7_MAX_HISTORY:-50}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - context7_data:/app/data
+      - context7_logs:/app/logs
+    stdin_open: true
+    tty: true
+    networks:
+      - context7_network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import sys; sys.path.insert(0, 'src'); from config import config; print('OK')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Optional: Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: context7-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - context7_network
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+
+  # Optional: Monitoring with Prometheus
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: context7-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    networks:
+      - context7_network
+    restart: unless-stopped
+
+volumes:
+  context7_data:
+  context7_logs:
+  redis_data:
+  prometheus_data:
+
+networks:
+  context7_network:
+    driver: bridge

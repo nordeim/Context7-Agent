@@ -1,3 +1,215 @@
+<think>
+# Re-imagining pyproject.toml and README.md
+
+Let me systematically analyze and improve both the pyproject.toml and README.md files to match the exceptional quality of our re-imagined test suite and codebase.
+
+## Analysis Planning
+
+### pyproject.toml Improvements Needed
+1. **Version Management**: Update to reflect our v2.0.0 architecture
+2. **Dependency Precision**: Match exact versions from requirements.txt
+3. **Metadata Enhancement**: Add comprehensive project metadata
+4. **Tool Configuration**: Add pytest, coverage, and other dev tools
+5. **Entry Points**: Ensure CLI entry point is correctly configured
+6. **Optional Dependencies**: Expand dev dependencies to match test suite
+
+### README.md Re-imagination Goals
+1. **Visual Impact**: Stunning GitHub-ready design
+2. **Comprehensive Documentation**: All aspects covered
+3. **Interactive Elements**: Mermaid diagrams, badges, code examples
+4. **Deployment Guides**: Multiple deployment scenarios
+5. **Developer Experience**: Clear contribution guidelines
+6. **Future Vision**: Compelling roadmap
+
+## Implementation Strategy
+1. Update pyproject.toml with precise dependencies
+2. Create comprehensive README with visual elements
+3. Ensure both files work together seamlessly
+4. Validate against our improved codebase
+</think>
+
+# 🚀 Re-imagined Project Documentation
+
+## Enhanced `pyproject.toml`
+
+```toml
+[build-system]
+requires = ["setuptools>=69.0", "wheel>=0.42.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "context7-agent"
+version = "2.0.0"
+description = "Production-grade AI agent with Context7 MCP integration, stunning TUI, and comprehensive test suite"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Context7 Agent Team", email = "agent@context7.ai"}
+]
+maintainers = [
+    {name = "Context7 Agent Team", email = "agent@context7.ai"}
+]
+keywords = ["ai", "rag", "mcp", "terminal", "tui", "developer-tools", "openai", "pydantic-ai"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Terminals",
+    "Topic :: Utilities",
+]
+dependencies = [
+    "anyio==4.9.0",
+    "aiofiles==24.1.0",
+    "openai==1.95.1",
+    "pydantic==2.11.7",
+    "pydantic-settings==2.10.1",
+    "pydantic-ai==0.4.2",
+    "python-dotenv==1.1.1",
+    "rich==14.0.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.3.5",
+    "pytest-asyncio==0.25.3",
+    "pytest-mock==3.14.0",
+    "pytest-cov==6.0.0",
+    "pytest-xdist==3.6.1",
+    "black==25.1.0",
+    "mypy==1.15.0",
+    "ruff==0.9.0",
+    "pre-commit==4.1.0",
+    "hypothesis==6.122.3",
+    "freezegun==1.5.1",
+    "aioresponses==0.7.7",
+]
+docs = [
+    "mkdocs==1.6.1",
+    "mkdocs-material==9.5.49",
+    "mkdocstrings[python]==0.27.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/nordeim/Context7-MCP-RAG-Agent"
+Repository = "https://github.com/nordeim/Context7-MCP-RAG-Agent"
+Documentation = "https://context7-agent.readthedocs.io"
+Issues = "https://github.com/nordeim/Context7-MCP-RAG-Agent/issues"
+Changelog = "https://github.com/nordeim/Context7-MCP-RAG-Agent/blob/main/CHANGELOG.md"
+
+[project.scripts]
+context7 = "src.cli:main"
+context7-agent = "src.cli:main"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.black]
+line-length = 88
+target-version = ['py311', 'py312', 'py313']
+include = '\.pyi?$'
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+target-version = "py311"
+line-length = 88
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    "I",  # isort
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+]
+
+[tool.ruff.per-file-ignores]
+"tests/*" = ["B011", "F841"]  # tests can use assert False and unused variables
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
+addopts = "-v --tb=short --strict-markers --cov=src --cov-report=term-missing --cov-report=html --cov-fail-under=90"
+asyncio_mode = "auto"
+markers = [
+    "slow: marks tests as slow",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests",
+]
+
+[tool.coverage.run]
+source = ["src"]
+omit = [
+    "*/tests/*",
+    "*/venv/*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug:",
+    "if settings.DEBUG",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+]
+```
+
+---
+
+# 🌌 Re-imagined README.md
+
 <div align="center">
 
 <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=200&section=header&text=Context7%20AI&fontSize=60&fontColor=ffffff&animation=fadeIn" alt="Context7 AI Banner"/>
@@ -9,12 +221,10 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-3776ab.svg?style=flat&logo=python&logoColor=white)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Tests](https://img.shields.io/badge/Tests-95%25%20Coverage-success.svg)](https://github.com/nordeim/context7-agent-v3/actions)
-[![Code Quality](https://img.shields.io/badge/Code%20Quality-A+-brightgreen.svg)](https://github.com/nordeim/context7-agent-v3/actions)
+[![Tests](https://img.shields.io/badge/Tests-95%25%20Coverage-success.svg)](https://github.com/nordeim/Context7-MCP-RAG-Agent/actions)
+[![Code Quality](https://img.shields.io/badge/Code%20Quality-A+-brightgreen.svg)](https://github.com/nordeim/Context7-MCP-RAG-Agent/actions)
 [![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg?logo=docker)](https://hub.docker.com/r/context7/agent)
 [![Discord](https://img.shields.io/badge/Discord-Join-7289da.svg?logo=discord)](https://discord.gg/context7)
-
-<img src="https://raw.githubusercontent.com/nordeim/context7-agent-v3/refs/heads/main/main_screen.png" alt="Context7 AI Logo" width="800"/>
 
 </div>
 
@@ -162,8 +372,8 @@ pip install context7-agent
 
 #### Option 2: From Source
 ```bash
-git clone https://github.com/nordeim/context7-agent-v3.git
-cd context7-agent-v3
+git clone https://github.com/nordeim/Context7-MCP-RAG-Agent.git
+cd Context7-MCP-RAG-Agent
 pip install -r requirements.txt
 ```
 
@@ -208,8 +418,8 @@ OPENAI_API_KEY=sk-xxx context7 --theme ocean
 
 ```bash
 # Clone and setup
-git clone https://github.com/nordeim/context7-agent-v3.git
-cd context7-agent-v3
+git clone https://github.com/nordeim/Context7-MCP-RAG-Agent.git
+cd Context7-MCP-RAG-Agent
 python -m venv venv && source venv/bin/activate
 pip install -e ".[dev]"
 
@@ -387,7 +597,7 @@ We welcome contributions! Here's how to get started:
 
 ```bash
 # 1. Fork the repository
-gh repo fork nordeim/context7-agent-v3
+gh repo fork nordeim/Context7-MCP-RAG-Agent
 
 # 2. Create feature branch
 git checkout -b feature/amazing-feature
@@ -453,8 +663,8 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **Made with ❤️ by developers, for developers**
 
-[⭐ Star this repo](https://github.com/nordeim/context7-agent-v3) • 
-[🐛 Report bug](https://github.com/nordeim/context7-agent-v3/issues) • 
-[💡 Request feature](https://github.com/nordeim/context7-agent-v3/discussions)
+[⭐ Star this repo](https://github.com/nordeim/Context7-MCP-RAG-Agent) • 
+[🐛 Report bug](https://github.com/nordeim/Context7-MCP-RAG-Agent/issues) • 
+[💡 Request feature](https://github.com/nordeim/Context7-MCP-RAG-Agent/discussions)
 
 </div>

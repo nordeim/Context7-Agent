@@ -1,260 +1,145 @@
-"""
-Tests for history and session management classes.
-"""
+# File: tests/test_history.py
+"""Comprehensive tests for the HistoryManager."""
+import json
+from datetime import datetime
+from pathlib import Path
+from unittest.mock import patch
 
 import pytest
-import tempfile
-import os
-from unittest.mock import patch, AsyncMock
+from freezegun import freeze_time
 
-import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from src.history import HistoryManager
 
-from src.history import (
-    Message, SearchEntry, Bookmark, Session,
-    ConversationHistory, SearchHistory, BookmarkManager, SessionManager
-)
 
-class TestMessage:
-    """Test cases for Message class."""
+class TestHistoryManager:
+    """Test suite for HistoryManager."""
     
-    def test_message_creation(self):
-        """Test message creation."""
-        message = Message.create("user", "Hello world!")
+    @pytest.mark.asyncio
+    async def test_load_empty_history(self, history_manager: HistoryManager):
+        """Test loading history when file doesn't exist."""
+        await history_manager.load()
+        assert history_manager._history == {}
+    
+    @pytest.mark.asyncio
+    async def test_load_existing_history(self, history_manager: HistoryManager, sample_history_data):
+        """Test loading existing history from file."""
+        # Create test file
+        history_manager.history_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(history_manager.history_path, 'w') as f:
+            json.dump(sample_history_data, f)
         
-        assert message.role == "user"
-        assert message.content == "Hello world!"
-        assert message.id is not None
-        assert message.timestamp is not None
-        assert message.metadata == {}
+        await history_manager.load()
+        assert history_manager._history == sample_history_data
     
-    def test_message_with_metadata(self):
-        """Test message creation with metadata."""
-        metadata = {"session_id": "test-session"}
-        message = Message.create("assistant", "Hello!", metadata)
+    @pytest.mark.asyncio
+    async def test_save_history(self, history_manager: HistoryManager):
+        """Test saving history to file."""
+        history_manager._history = {"test": [{"role": "user", "content": "test"}]}
+        await history_manager.save()
         
-        assert message.metadata == metadata
+        assert history_manager.history_path.exists()
+        with open(history_manager.history_path) as f:
+            data = json.load(f)
+            assert data == history_manager._history
     
-    def test_message_serialization(self):
-        """Test message to/from dict conversion."""
-        message = Message.create("user", "Test message")
-        message_dict = message.to_dict()
+    @pytest.mark.asyncio
+    async def test_add_message_new_conversation(self, history_manager: HistoryManager):
+        """Test adding message to new conversation."""
+        with freeze_time("2024-01-01 12:00:00"):
+            await history_manager.add_message("new_conv", "user", "Hello")
         
-        assert "id" in message_dict
-        assert "role" in message_dict
-        assert "content" in message_dict
-        assert "timestamp" in message_dict
+        messages = history_manager._history["new_conv"]
+        assert len(messages) == 1
+        assert messages[0]["role"] == "user"
+        assert messages[0]["content"] == "Hello"
+        assert messages[0]["timestamp"] == "2024-01-01T12:00:00"
+    
+    @pytest.mark.asyncio
+    async def test_add_message_existing_conversation(self, history_manager: HistoryManager):
+        """Test adding message to existing conversation."""
+        history_manager._history["existing"] = [{"role": "user", "content": "First"}]
         
-        # Test deserialization
-        restored_message = Message.from_dict(message_dict)
-        assert restored_message.id == message.id
-        assert restored_message.role == message.role
-        assert restored_message.content == message.content
-
-class TestConversationHistory:
-    """Test cases for ConversationHistory class."""
-    
-    @pytest.fixture
-    def temp_file(self):
-        """Create a temporary file for testing."""
-        fd, path = tempfile.mkstemp(suffix='.json')
-        os.close(fd)
-        yield path
-        if os.path.exists(path):
-            os.unlink(path)
-    
-    @pytest.mark.asyncio
-    async def test_conversation_history_init(self):
-        """Test conversation history initialization."""
-        history = ConversationHistory()
+        await history_manager.add_message("existing", "assistant", "Response")
         
-        assert history.messages == []
-        assert history.current_session_id is None
-        assert history._loaded is False
+        messages = history_manager._history["existing"]
+        assert len(messages) == 2
+        assert messages[1]["role"] == "assistant"
+        assert messages[1]["content"] == "Response"
     
     @pytest.mark.asyncio
-    async def test_add_message(self, temp_file):
-        """Test adding messages to history."""
-        with patch('src.history.config') as mock_config:
-            mock_config.history_file = temp_file
-            mock_config.max_history = 1000
-            
-            history = ConversationHistory()
-            
-            message = await history.add_message("user", "Test message")
-            
-            assert message.role == "user"
-            assert message.content == "Test message"
-            assert len(history.messages) == 1
+    async def test_history_limit_enforcement(self, history_manager: HistoryManager):
+        """Test that history limit is enforced."""
+        history_manager.max_history = 3
+        
+        # Add 5 messages
+        for i in range(5):
+            await history_manager.add_message("test", "user", f"Message {i}")
+        
+        messages = history_manager._history["test"]
+        assert len(messages) == 3  # Should be limited
+        assert messages[0]["content"] == "Message 2"
+        assert messages[2]["content"] == "Message 4"
+    
+    def test_get_messages_format(self, history_manager: HistoryManager):
+        """Test that get_messages returns correct format."""
+        history_manager._history["test"] = [
+            {"role": "user", "content": "Hello", "timestamp": "2024-01-01"},
+            {"role": "assistant", "content": "Hi", "timestamp": "2024-01-01"}
+        ]
+        
+        messages = history_manager.get_messages("test")
+        assert len(messages) == 2
+        
+        # Should not include timestamp
+        for msg in messages:
+            assert "role" in msg
+            assert "content" in msg
+            assert "timestamp" not in msg
+    
+    def test_get_conversations(self, history_manager: HistoryManager):
+        """Test conversation metadata retrieval."""
+        history_manager._history = {
+            "conv1": [
+                {"role": "user", "content": "Short message", "timestamp": "2024-01-01T10:00:00"},
+                {"role": "assistant", "content": "Short response", "timestamp": "2024-01-01T10:01:00"}
+            ],
+            "conv2": [
+                {"role": "user", "content": "This is a very long message that should be truncated", "timestamp": "2024-01-01T09:00:00"}
+            ]
+        }
+        
+        conversations = history_manager.get_conversations()
+        assert len(conversations) == 2
+        
+        # Check ordering (newest first)
+        assert conversations[0]["id"] == "conv1"
+        assert conversations[1]["id"] == "conv2"
+        
+        # Check truncation
+        assert conversations[1]["last_message"] == "This is a very long message that should be tr..."
+        assert conversations[1]["message_count"] == 1
     
     @pytest.mark.asyncio
-    async def test_get_recent_messages(self, temp_file):
-        """Test getting recent messages."""
-        with patch('src.history.config') as mock_config:
-            mock_config.history_file = temp_file
-            mock_config.max_history = 1000
-            
-            history = ConversationHistory()
-            
-            # Add multiple messages
-            for i in range(10):
-                await history.add_message("user", f"Message {i}")
-            
-            recent = await history.get_recent_messages(5)
-            assert len(recent) == 5
-            assert recent[-1].content == "Message 9"
+    async def test_load_corrupted_file(self, history_manager: HistoryManager, capsys):
+        """Test handling of corrupted history file."""
+        # Create corrupted file
+        history_manager.history_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(history_manager.history_path, 'w') as f:
+            f.write("invalid json")
+        
+        await history_manager.load()
+        assert history_manager._history == {}
+        
+        # Check warning message
+        captured = capsys.readouterr()
+        assert "Warning" in captured.out
     
     @pytest.mark.asyncio
-    async def test_search_messages(self, temp_file):
-        """Test searching messages."""
-        with patch('src.history.config') as mock_config:
-            mock_config.history_file = temp_file
-            mock_config.max_history = 1000
-            
-            history = ConversationHistory()
-            
-            await history.add_message("user", "Tell me about Python")
-            await history.add_message("assistant", "Python is a programming language")
-            await history.add_message("user", "What about Java?")
-            
-            # Search for Python-related messages
-            results = await history.search_messages("Python")
-            assert len(results) == 2
-            
-            # Search for non-existent term
-            results = await history.search_messages("nonexistent")
-            assert len(results) == 0
-
-class TestSessionManager:
-    """Test cases for SessionManager class."""
-    
-    @pytest.fixture
-    def temp_file(self):
-        """Create a temporary file for testing."""
-        fd, path = tempfile.mkstemp(suffix='.json')
-        os.close(fd)
-        yield path
-        if os.path.exists(path):
-            os.unlink(path)
-    
-    @pytest.mark.asyncio
-    async def test_create_session(self, temp_file):
-        """Test session creation."""
-        with patch('src.history.config') as mock_config:
-            mock_config.sessions_file = temp_file
-            
-            manager = SessionManager()
-            
-            session = await manager.create_session("Test Session", "cyberpunk")
-            
-            assert session.name == "Test Session"
-            assert session.theme == "cyberpunk"
-            assert session.id is not None
-            assert manager.current_session == session
-    
-    @pytest.mark.asyncio
-    async def test_switch_session(self, temp_file):
-        """Test switching between sessions."""
-        with patch('src.history.config') as mock_config:
-            mock_config.sessions_file = temp_file
-            
-            manager = SessionManager()
-            
-            # Create two sessions
-            session1 = await manager.create_session("Session 1")
-            session2 = await manager.create_session("Session 2")
-            
-            # Switch back to session 1
-            switched = await manager.switch_session(session1.id)
-            
-            assert switched == session1
-            assert manager.current_session == session1
-    
-    @pytest.mark.asyncio
-    async def test_delete_session(self, temp_file):
-        """Test session deletion."""
-        with patch('src.history.config') as mock_config:
-            mock_config.sessions_file = temp_file
-            
-            manager = SessionManager()
-            
-            session = await manager.create_session("Test Session")
-            session_id = session.id
-            
-            # Delete the session
-            result = await manager.delete_session(session_id)
-            
-            assert result is True
-            assert manager.current_session is None
-            assert len(manager.sessions) == 0
-
-class TestBookmarkManager:
-    """Test cases for BookmarkManager class."""
-    
-    @pytest.fixture
-    def temp_file(self):
-        """Create a temporary file for testing."""
-        fd, path = tempfile.mkstemp(suffix='.json')
-        os.close(fd)
-        yield path
-        if os.path.exists(path):
-            os.unlink(path)
-    
-    @pytest.mark.asyncio
-    async def test_add_bookmark(self, temp_file):
-        """Test adding bookmarks."""
-        with patch('src.history.config') as mock_config:
-            mock_config.bookmarks_file = temp_file
-            
-            manager = BookmarkManager()
-            
-            bookmark = await manager.add_bookmark(
-                title="Test Document",
-                file_path="/test/path.md",
-                description="A test document",
-                tags=["test", "python"],
-                session_id="test-session"
-            )
-            
-            assert bookmark.title == "Test Document"
-            assert bookmark.file_path == "/test/path.md"
-            assert "test" in bookmark.tags
-            assert "python" in bookmark.tags
-    
-    @pytest.mark.asyncio
-    async def test_search_bookmarks(self, temp_file):
-        """Test searching bookmarks."""
-        with patch('src.history.config') as mock_config:
-            mock_config.bookmarks_file = temp_file
-            
-            manager = BookmarkManager()
-            
-            # Add multiple bookmarks
-            await manager.add_bookmark("Python Guide", "/python.md", "Python tutorial", ["python"], "session1")
-            await manager.add_bookmark("Java Tutorial", "/java.md", "Java basics", ["java"], "session1")
-            await manager.add_bookmark("Python Advanced", "/advanced.md", "Advanced Python", ["python", "advanced"], "session1")
-            
-            # Search for Python bookmarks
-            results = await manager.search_bookmarks("python")
-            assert len(results) == 2
-            
-            # Search by tag
-            python_bookmarks = await manager.get_bookmarks("python")
-            assert len(python_bookmarks) == 2
-    
-    @pytest.mark.asyncio
-    async def test_remove_bookmark(self, temp_file):
-        """Test removing bookmarks."""
-        with patch('src.history.config') as mock_config:
-            mock_config.bookmarks_file = temp_file
-            
-            manager = BookmarkManager()
-            
-            bookmark = await manager.add_bookmark("Test", "/test.md", "Test", ["test"], "session1")
-            bookmark_id = bookmark.id
-            
-            # Remove the bookmark
-            result = await manager.remove_bookmark(bookmark_id)
-            
-            assert result is True
-            assert len(manager.bookmarks) == 0
+    async def test_save_permission_error(self, history_manager: HistoryManager, capsys):
+        """Test handling of permission errors during save."""
+        # Mock file system error
+        with patch('aiofiles.open', side_effect=PermissionError("Access denied")):
+            await history_manager.save()
+        
+        captured = capsys.readouterr()
+        assert "Warning" in captured.out
